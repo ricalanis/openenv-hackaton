@@ -1,0 +1,19 @@
+name: datasage-train-enrichment
+type: job
+gpu: h100
+image: nvidia/cuda:12.1.0-devel-ubuntu22.04
+env:
+  - name: HF_TOKEN
+    secret: hf-token
+  - name: WANDB_API_KEY
+    secret: wandb-api-key
+  - name: STAGE
+    value: enrichment
+command: |
+  pip install -q unsloth trl transformers accelerate peft bitsandbytes vllm wandb
+  pip install -q "openenv-core[core]>=0.2.1" pandas numpy datasets
+  python training/train_enrichment.py
+resources:
+  gpu: 1
+  memory: 80Gi
+  cpu: 8
