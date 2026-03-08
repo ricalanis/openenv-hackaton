@@ -156,11 +156,11 @@ def test_has_get_text_helper(name):
 
 
 @pytest.mark.parametrize('name', NOTEBOOK_NAMES)
-def test_step_payload_not_wrapped(name):
-    """Step calls must send action fields at top level, not nested in {"action": ...}."""
+def test_uses_web_endpoints(name):
+    """Notebooks must use /web/reset and /web/step (not /reset and /step)."""
     src = _get_all_source(_load_notebook(name))
-    assert 'json={"action"' not in src, \
-        f"{name} wraps step payload in {{\"action\": ...}} — server expects top-level fields"
+    assert '/web/reset' in src, f"{name} should use /web/reset"
+    assert '/web/step' in src, f"{name} should use /web/step"
 
 
 @pytest.mark.parametrize('name', NOTEBOOK_NAMES)
