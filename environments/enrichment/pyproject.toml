@@ -20,12 +20,9 @@ dev = [
 ]
 
 [project.scripts]
-server = "environments.enrichment.server.app:main"
+server = "datasage_enrichment.server.app:main"
 
 [tool.setuptools]
 include-package-data = true
-packages = ["environments.enrichment", "environments.enrichment.server"]
-package-dir = {
-    "environments.enrichment" = ".",
-    "environments.enrichment.server" = "server",
-}
+packages = ["datasage_enrichment", "datasage_enrichment.server"]
+package-dir = { "datasage_enrichment" = ".", "datasage_enrichment.server" = "server" }

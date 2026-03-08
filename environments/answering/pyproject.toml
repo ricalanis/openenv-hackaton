@@ -23,9 +23,9 @@ patronus = [
 ]
 
 [project.scripts]
-server = "environments.answering.server.app:main"
+server = "datasage_answering.server.app:main"
 
 [tool.setuptools]
 include-package-data = true
-packages = ["environments.answering", "environments.answering.server"]
-package-dir = { "environments.answering" = ".", "environments.answering.server" = "server" }
+packages = ["datasage_answering", "datasage_answering.server"]
+package-dir = { "datasage_answering" = ".", "datasage_answering.server" = "server" }
