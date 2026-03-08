@@ -1,0 +1,337 @@
+{
+  "answering_extended": {
+    "gpt-4o-mini": {
+      "episodes": [
+        {
+          "domain": "sales",
+          "persona": "Individual Contributor",
+          "question": "Which reps are below quota?",
+          "answer": "To find out which sales reps are below quota, we first need to identify the quota numbers. Unfortunately, I don't have the specific quota values for each rep. However, I can help you identify your current performance compared to the average deal amounts.\n\nHere's how you can check who might be below average based on the data we have:\n\n1. **Average Deal Amount**: The average deal amount is **$53.25**. If your personal sales amount is below this average, you might be considered below quota.\n\n2. **L",
+          "cited_columns": [
+            "Amount",
+            "Rep"
+          ],
+          "reward": 0.8043,
+          "done": true
+        },
+        {
+          "domain": "hr",
+          "persona": "Executive",
+          "question": "What factors correlate most with employee turnover?",
+          "answer": "To strategically analyze the factors correlating with employee turnover, we can focus on several key metrics from our dataset that have demonstrated a significant association with attrition rates.\n\n1. **Job Satisfaction**: Although specific figures for job satisfaction were not included in the summary, it is typically a key driver of employee retention. High job satisfaction correlates with lower turnover rates. Investing in employee engagement initiatives could yield an increase in retention, p",
+          "cited_columns": [
+            "Age",
+            "Attrition",
+            "OverTime"
+          ],
+          "reward": 0.7331,
+          "done": true
+        },
+        {
+          "domain": "pm",
+          "persona": "Executive",
+          "question": "What's the burndown rate for the current sprint?",
+          "answer": "To determine the burndown rate for the current sprint, we can analyze the completion metrics in relation to the estimated hours. \n\nBased on the dataset, we have the following key statistics:\n\n- **Estimated Hours**: The mean estimated hours for all tasks is approximately **50.8 hours**.\n- **Actual Hours**: The mean actual hours recorded is around **49.2 hours**.\n- **Completion Percentage**: The average completion percentage across tasks stands at **50.9%**.\n\nTo calculate the burndown rate, we can",
+          "cited_columns": [],
+          "reward": 0.275,
+          "done": true
+        },
+        {
+          "domain": "pm",
+          "persona": "Individual Contributor",
+          "question": "Which projects are at risk of missing deadlines?",
+          "answer": "To figure out which projects might miss their deadlines, we can look at the tasks that are currently \"Not Started\", \"In Progress\", or \"On Hold\", especially those with a high priority or a flag indicating risk. \n\nHere are the key points to check:\n\n1. **Status**: Tasks that are \"Not Started\" or \"On Hold\" need immediate attention since they are behind schedule.\n2. **RiskFlag**: Tasks marked with a risk flag should be prioritized, as they are more likely to miss their deadlines.\n3. **Due Date**: Com",
+          "cited_columns": [
+            "Status",
+            "Priority",
+            "DueDate",
+            "RiskFlag"
+          ],
+          "reward": 0.94,
+          "done": true
+        },
+        {
+          "domain": "sales",
+          "persona": "Manager",
+          "question": "What's the average deal velocity by region?",
+          "answer": "To assess the average deal velocity by region, we can leverage the 'DaysInStage' column, which provides insight into the time deals spend in various stages. \n\nHere\u2019s the breakdown of the average deal velocity by region based on the available data:\n\n1. **East Region**: \n   - Deals: 25\n   - Average Days in Stage: 48.4 (this is the overall average, but we will assume similar for the region for simplicity)\n\n2. **Central Region**: \n   - Deals: 21\n   - Average Days in Stage: 48.4\n\n3. **North Region**:",
+          "cited_columns": [
+            "Stage",
+            "Region",
+            "DaysInStage"
+          ],
+          "reward": 0.825,
+          "done": true
+        },
+        {
+          "domain": "hr",
+          "persona": "Executive",
+          "question": "What is the salary distribution across job roles?",
+          "answer": "To provide a comprehensive analysis of the salary distribution across job roles, we can leverage the relevant data columns, particularly focusing on the 'JobRole' and 'MonthlyIncome' metrics.\n\n### Salary Distribution by Job Role\n\n1. **Overall Monthly Income Metrics**:\n   - **Mean Monthly Income**: $49,139.40\n   - **Standard Deviation**: $19,556.34\n   - **Income Range**: From a minimum of -$9.29 (likely an error) to a maximum of $89.95.\n\n2. **Job Role Breakdown**:\n   - **Manager**: 19 employees\n ",
+          "cited_columns": [
+            "Age",
+            "JobRole",
+            "MonthlyIncome"
+          ],
+          "reward": 0.37,
+          "done": true
+        },
+        {
+          "domain": "it_ops",
+          "persona": "Manager",
+          "question": "Which systems have the most incidents?",
+          "answer": "To identify which systems are experiencing the most incidents, we can analyze the 'AffectedSystem' column in conjunction with the 'Category' column to determine the frequency of incidents per system.\n\nCurrently, based on the incident distribution by category, the following key points emerge:\n\n- **Access** incidents account for **24** occurrences.\n- **Network** incidents also report **24** occurrences.\n- **Hardware** incidents follow closely with **22** occurrences.\n- **Email** incidents have **1",
+          "cited_columns": [
+            "Category",
+            "AffectedSystem"
+          ],
+          "reward": 0.895,
+          "done": true
+        },
+        {
+          "domain": "it_ops",
+          "persona": "Individual Contributor",
+          "question": "What's the mean time to resolution trend?",
+          "answer": "The mean time to resolution trend is an important metric, and here's a straightforward breakdown for you.\n\nThe average time it takes to resolve tickets, based on the SLATarget, is about **47.6 hours**. This means that on average, it typically takes around 2 days to resolve issues. The range of time varies quite a bit, with some tickets being resolved in as little as **3.6 hours** and others taking up to **91 hours**.\n\nTo keep things moving forward, you might want to focus on your current tasks a",
+          "cited_columns": [
+            "SLATarget"
+          ],
+          "reward": 0.85,
+          "done": true
+        }
+      ],
+      "mean_reward": 0.7116,
+      "n": 8
+    },
+    "qwen3-8b": {
+      "episodes": [
+        {
+          "domain": "pm",
+          "persona": "Executive",
+          "question": "How is resource utilization across teams?",
+          "answer": "<think>\nOkay, let me tackle this query. The user is an executive asking about resource utilization across teams. They care about costs, ROI, strategic risk, portfolio trends, and year-over-year comparisons. So I need to focus on high-level metrics and strategic implications.\n\nFirst, looking at the available columns, the key ones for resource utilization would be EstimatedHours, ActualHours, CompletionPct, and maybe Status and Priority. The column stats show that ActualHours has a mean of 49.2 an",
+          "cited_columns": [
+            "Status",
+            "Priority",
+            "EstimatedHours",
+            "ActualHours",
+            "CompletionPct"
+          ],
+          "reward": 0.73,
+          "done": true
+        },
+        {
+          "domain": "hr",
+          "persona": "Executive",
+          "question": "What factors correlate most with employee turnover?",
+          "answer": "<think>\nOkay, let's tackle this question about employee turnover factors from an executive perspective. The user wants to know which factors correlate most with turnover, focusing on costs, ROI, strategic risk, and portfolio trends. \n\nFirst, I need to recall the available columns and their stats. The columns include Age, Department, JobRole, MonthlyIncome, YearsAtCompany, Attrition, JobSatisfaction, OverTime, DistanceFromHome, Education, and PerformanceRating. The Attrition column has 51 'Yes' r",
+          "cited_columns": [
+            "Age",
+            "Department",
+            "JobRole",
+            "MonthlyIncome",
+            "YearsAtCompany",
+            "Attrition",
+            "JobSatisfaction",
+            "OverTime",
+            "DistanceFromHome",
+            "Education",
+            "PerformanceRating"
+          ],
+          "reward": 0.57,
+          "done": true
+        },
+        {
+          "domain": "it_ops",
+          "persona": "Manager",
+          "question": "How many tickets are breaching SLA?",
+          "answer": "<think>\nOkay, the user is a manager in IT operations, so they need actionable insights. The question is about how many tickets are breaching SLA. Let me check the available data.\n\nFirst, the columns given include SLATarget and ResolvedDate. The SLATarget has a mean of 47.6 and a standard deviation of 19.6. But the main thing is that we need to find tickets where the SLA was breached. \n\nWait, the dataset summary mentions SLATarget's stats, but how do we determine if a ticket breached the SLA? Typ",
+          "cited_columns": [
+            "Status",
+            "CreatedDate",
+            "ResolvedDate",
+            "SLATarget"
+          ],
+          "reward": 0.7083,
+          "done": true
+        },
+        {
+          "domain": "hr",
+          "persona": "Individual Contributor",
+          "question": "Which employees are at highest flight risk?",
+          "answer": "<think>\nOkay, the user is an individual contributor in HR, so they need simple, actionable information. The question is about identifying employees at highest flight risk, which I assume refers to attrition. The available columns include Attrition, which is a binary variable (Yes/No), so maybe the dataset has a column that indicates if an employee has left.\n\nLooking at the columns provided, there's an 'Attrition' column with counts: Yes=51, which suggests that 51 employees have left. But the use",
+          "cited_columns": [
+            "Age",
+            "Department",
+            "JobRole",
+            "MonthlyIncome",
+            "YearsAtCompany",
+            "Attrition",
+            "JobSatisfaction",
+            "OverTime",
+            "DistanceFromHome",
+            "Education",
+            "PerformanceRating"
+          ],
+          "reward": 0.5,
+          "done": true
+        },
+        {
+          "domain": "hr",
+          "persona": "Executive",
+          "question": "Which departments have the highest attrition rates?",
+          "answer": "<think>\nOkay, let's tackle this question. The user is an executive asking which departments have the highest attrition rates. They want a strategic, financial focus with metrics and percentages.\n\nFirst, I need to look at the available columns. The Attrition column has 'Yes' and 'No' values. The dataset summary shows that there are 100 entries, with 51 'Yes' for attrition. But the Department column has counts: Sales (37), Human Resources (32), Research & Development (31). Wait, that adds up to 10",
+          "cited_columns": [
+            "Age",
+            "Department",
+            "Attrition"
+          ],
+          "reward": 0.485,
+          "done": true
+        },
+        {
+          "domain": "it_ops",
+          "persona": "Individual Contributor",
+          "question": "What's the mean time to resolution trend?",
+          "answer": "<think>\nOkay, the user is asking about the mean time to resolution trend. Let me check the available columns. The relevant columns here are CreatedDate, ResolvedDate, and SLATarget. The SLATarget has a mean of 47.6, which is the average target time. But the user is asking about the trend, so I need to look at how the actual resolution times compare over time.\n\nWait, the data provided includes CreatedDate and ResolvedDate. To calculate the actual mean time to resolution, I need to find the differ",
+          "cited_columns": [
+            "CreatedDate",
+            "ResolvedDate",
+            "SLATarget"
+          ],
+          "reward": 0.5,
+          "done": true
+        },
+        {
+          "domain": "sales",
+          "persona": "Executive",
+          "question": "What's the average deal velocity by region?",
+          "answer": "<think>\nOkay, the user is asking about the average deal velocity by region. Let me start by understanding what \"deal velocity\" means here. From the context, I think it refers to how quickly deals move through the sales pipeline, which could be measured by the average number of days a deal spends in each stage or the time taken to close. The available columns include DaysInStage and CloseDate, so maybe DaysInStage is the key here.\n\nLooking at the columns, DaysInStage has a mean of 48.4 days. But ",
+          "cited_columns": [
+            "Stage",
+            "CloseDate",
+            "Region",
+            "DaysInStage"
+          ],
+          "reward": 0.195,
+          "done": true
+        },
+        {
+          "domain": "hr",
+          "persona": "Executive",
+          "question": "Which employees are at highest flight risk?",
+          "answer": "<think>\nOkay, the user is an executive asking which employees are at the highest flight risk. They want a strategic, financial, and ROI-focused answer. Let me look at the data columns provided. The relevant columns here are Attrition, which directly indicates if an employee has left, and others that might correlate with attrition.\n\nFirst, the Attrition column has 51 'Yes' and 49 'No' entries, so about 51% attrition rate. But the question is about predicting flight risk, not just current attritio",
+          "cited_columns": [
+            "Age",
+            "MonthlyIncome",
+            "YearsAtCompany",
+            "Attrition",
+            "JobSatisfaction",
+            "OverTime",
+            "DistanceFromHome"
+          ],
+          "reward": 0.4321,
+          "done": true
+        }
+      ],
+      "mean_reward": 0.5151,
+      "n": 8
+    }
+  },
+  "enrichment_extended": {
+    "gpt-4o-mini": [
+      {
+        "domain": "pm",
+        "initial_coverage": 0.0,
+        "final_coverage": 0.2,
+        "total_reward": 2.4,
+        "avg_reward": 0.2,
+        "steps": 12,
+        "fields_added": 12
+      },
+      {
+        "domain": "hr",
+        "initial_coverage": 0.0,
+        "final_coverage": 0.2,
+        "total_reward": 2.4,
+        "avg_reward": 0.2,
+        "steps": 12,
+        "fields_added": 12
+      },
+      {
+        "domain": "pm",
+        "initial_coverage": 0.0,
+        "final_coverage": 0.2,
+        "total_reward": 2.4,
+        "avg_reward": 0.2,
+        "steps": 12,
+        "fields_added": 12
+      },
+      {
+        "domain": "it_ops",
+        "initial_coverage": 0.0,
+        "final_coverage": 0.2,
+        "total_reward": 2.4,
+        "avg_reward": 0.2,
+        "steps": 12,
+        "fields_added": 12
+      },
+      {
+        "domain": "it_ops",
+        "initial_coverage": 0.0,
+        "final_coverage": 0.2,
+        "total_reward": 2.4,
+        "avg_reward": 0.2,
+        "steps": 12,
+        "fields_added": 12
+      }
+    ],
+    "qwen3-8b": [
+      {
+        "domain": "sales",
+        "initial_coverage": 0.0,
+        "final_coverage": 0.2,
+        "total_reward": 2.4,
+        "avg_reward": 0.2,
+        "steps": 12,
+        "fields_added": 12
+      },
+      {
+        "domain": "hr",
+        "initial_coverage": 0.0,
+        "final_coverage": 0.2,
+        "total_reward": 2.4,
+        "avg_reward": 0.2,
+        "steps": 12,
+        "fields_added": 12
+      },
+      {
+        "domain": "pm",
+        "initial_coverage": 0.0,
+        "final_coverage": 0.2,
+        "total_reward": 2.4,
+        "avg_reward": 0.2,
+        "steps": 12,
+        "fields_added": 12
+      },
+      {
+        "domain": "hr",
+        "initial_coverage": 0.0,
+        "final_coverage": 0.2,
+        "total_reward": 2.4,
+        "avg_reward": 0.2,
+        "steps": 12,
+        "fields_added": 12
+      },
+      {
+        "domain": "sales",
+        "initial_coverage": 0.0,
+        "final_coverage": 0.2,
+        "total_reward": 2.4,
+        "avg_reward": 0.2,
+        "steps": 12,
+        "fields_added": 12
+      }
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+gradio>=4.0
+langgraph>=0.2
+langchain>=0.3
+langchain-openai>=0.2
+langchain-community>=0.3
+openai>=1.0
+huggingface-hub>=0.20
+requests>=2.31
+plotly>=5.18
+pandas>=2.0
+numpy>=1.24
+pydantic>=2.0
+python-dotenv>=1.0

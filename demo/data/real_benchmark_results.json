@@ -1,0 +1,293 @@
+{
+  "metadata": {
+    "timestamp": "2026-03-08T07:59:35.083797",
+    "n_episodes": 3,
+    "models": [
+      "gpt-4o-mini",
+      "qwen3-8b"
+    ]
+  },
+  "cleaning": {
+    "gpt-4o-mini": {
+      "episodes": [
+        {
+          "domain": "sales",
+          "initial_dq": 0.967,
+          "final_dq": 0.967,
+          "dq_improvement": 0.0,
+          "total_reward": 0.9619,
+          "avg_reward": 0.9619,
+          "steps": 1
+        },
+        {
+          "domain": "hr",
+          "initial_dq": 0.9614,
+          "final_dq": 0.9614,
+          "dq_improvement": 0.0,
+          "total_reward": 0.958,
+          "avg_reward": 0.958,
+          "steps": 1
+        },
+        {
+          "domain": "sales",
+          "initial_dq": 0.967,
+          "final_dq": 0.967,
+          "dq_improvement": 0.0,
+          "total_reward": 0.9619,
+          "avg_reward": 0.9619,
+          "steps": 1
+        }
+      ],
+      "summary": {
+        "final_dq_mean": 0.9651,
+        "final_dq_std": 0.0032,
+        "dq_improvement_mean": 0.0,
+        "dq_improvement_std": 0.0,
+        "avg_reward_mean": 0.9606,
+        "avg_reward_std": 0.0023,
+        "steps_mean": 1.0,
+        "steps_std": 0.0,
+        "n_valid": 3,
+        "n_total": 3
+      }
+    },
+    "qwen3-8b": {
+      "episodes": [
+        {
+          "domain": "pm",
+          "initial_dq": 0.967,
+          "final_dq": 0.967,
+          "dq_improvement": 0.0,
+          "total_reward": 0.9619,
+          "avg_reward": 0.9619,
+          "steps": 1
+        },
+        {
+          "domain": "it_ops",
+          "initial_dq": 0.9722,
+          "final_dq": 0.9722,
+          "dq_improvement": 0.0,
+          "total_reward": 0.9655,
+          "avg_reward": 0.9655,
+          "steps": 1
+        },
+        {
+          "domain": "pm",
+          "initial_dq": 0.967,
+          "final_dq": 0.967,
+          "dq_improvement": 0.0,
+          "total_reward": 0.9619,
+          "avg_reward": 0.9619,
+          "steps": 1
+        }
+      ],
+      "summary": {
+        "final_dq_mean": 0.9687,
+        "final_dq_std": 0.003,
+        "dq_improvement_mean": 0.0,
+        "dq_improvement_std": 0.0,
+        "avg_reward_mean": 0.9631,
+        "avg_reward_std": 0.0021,
+        "steps_mean": 1.0,
+        "steps_std": 0.0,
+        "n_valid": 3,
+        "n_total": 3
+      }
+    }
+  },
+  "enrichment": {
+    "gpt-4o-mini": {
+      "episodes": [
+        {
+          "domain": "pm",
+          "initial_coverage": 0.0,
+          "final_coverage": 0.2,
+          "total_reward": 2.4,
+          "avg_reward": 0.2,
+          "steps": 12,
+          "fields_added": 12
+        },
+        {
+          "domain": "pm",
+          "initial_coverage": 0.0,
+          "final_coverage": 0.2,
+          "total_reward": 2.4,
+          "avg_reward": 0.2,
+          "steps": 12,
+          "fields_added": 12
+        },
+        {
+          "domain": "hr",
+          "initial_coverage": 0.0,
+          "final_coverage": 0.2,
+          "total_reward": 2.4,
+          "avg_reward": 0.2,
+          "steps": 12,
+          "fields_added": 12
+        }
+      ],
+      "summary": {
+        "final_coverage_mean": 0.2,
+        "final_coverage_std": 0.0,
+        "avg_reward_mean": 0.2,
+        "avg_reward_std": 0.0,
+        "steps_mean": 12.0,
+        "steps_std": 0.0,
+        "fields_added_mean": 12.0,
+        "fields_added_std": 0.0,
+        "n_valid": 3,
+        "n_total": 3
+      }
+    },
+    "qwen3-8b": {
+      "episodes": [
+        {
+          "domain": "it_ops",
+          "initial_coverage": 0.0,
+          "final_coverage": 0.2,
+          "total_reward": 2.4,
+          "avg_reward": 0.2,
+          "steps": 12,
+          "fields_added": 12
+        },
+        {
+          "domain": "sales",
+          "initial_coverage": 0.0,
+          "final_coverage": 0.2,
+          "total_reward": 2.4,
+          "avg_reward": 0.2,
+          "steps": 12,
+          "fields_added": 12
+        },
+        {
+          "domain": "sales",
+          "initial_coverage": 0.0,
+          "final_coverage": 0.2,
+          "total_reward": 2.4,
+          "avg_reward": 0.2,
+          "steps": 12,
+          "fields_added": 12
+        }
+      ],
+      "summary": {
+        "final_coverage_mean": 0.2,
+        "final_coverage_std": 0.0,
+        "avg_reward_mean": 0.2,
+        "avg_reward_std": 0.0,
+        "steps_mean": 12.0,
+        "steps_std": 0.0,
+        "fields_added_mean": 12.0,
+        "fields_added_std": 0.0,
+        "n_valid": 3,
+        "n_total": 3
+      }
+    }
+  },
+  "answering": {
+    "gpt-4o-mini": {
+      "episodes": [
+        {
+          "domain": "sales",
+          "persona": "Manager",
+          "question": "What's our pipeline health for this quarter?",
+          "answer": "To assess our pipeline health for this quarter, let's break down the key metrics that impact our team's performance and operational efficiency.\n\n1. **Current Stage Distribution**: \n   - We have a total of **100 deals** in the pipeline. The distribution across stages is as follows:\n     - **Won**: 26 deals\n     - **Qualification**: 20 deals\n     - **Negotiation**: 14 deals\n     - **Proposal**: 14 deals\n     - **Prospecting**: 13 deals\n\n   This indicates that about **26%** of our pipeline is curre",
+          "cited_columns": [
+            "Stage",
+            "Amount"
+          ],
+          "reward": 0.825,
+          "done": true
+        },
+        {
+          "domain": "hr",
+          "persona": "Manager",
+          "question": "What factors correlate most with employee turnover?",
+          "answer": "To address the factors correlating with employee turnover, we should focus on several key metrics that can provide insights into the operational health of our team and identify potential process bottlenecks.\n\n1. **Job Satisfaction**: High levels of job satisfaction are critical. Employees with low job satisfaction are more likely to leave. If we have access to survey data on job satisfaction, we should analyze those scores alongside attrition rates.\n\n2. **Years at Company**: Employees with fewer",
+          "cited_columns": [
+            "Age",
+            "Attrition",
+            "OverTime"
+          ],
+          "reward": 0.94,
+          "done": true
+        },
+        {
+          "domain": "pm",
+          "persona": "Manager",
+          "question": "Which projects are at risk of missing deadlines?",
+          "answer": "To identify projects at risk of missing deadlines, we need to focus on the key indicators: project status, completion percentage, and due dates.\n\n**Projects at Risk:**\n1. **In Progress and Not Started Tasks**: Tasks that are either \"In Progress\" or \"Not Started\" are potential red flags. We currently have:\n   - **29 Not Started** tasks\n   - **17 In Progress** tasks\n\n2. **Completion Percentage**: We should look at tasks with a Completion Percentage below 50%, which indicates they are lagging behin",
+          "cited_columns": [
+            "Status",
+            "Dependencies"
+          ],
+          "reward": 0.895,
+          "done": true
+        }
+      ],
+      "summary": {
+        "reward_mean": 0.8867,
+        "reward_std": 0.058,
+        "n_valid": 3,
+        "n_total": 3
+      }
+    },
+    "qwen3-8b": {
+      "episodes": [
+        {
+          "domain": "hr",
+          "persona": "Executive",
+          "question": "What is the salary distribution across job roles?",
+          "answer": "<think>\nOkay, the user is asking about the salary distribution across job roles. Let me check the available columns. The relevant columns here are JobRole and MonthlyIncome. The dataset has 100 entries, and the JobRole categories include Manager, Manufacturing Director, Sales Executive, Research Scientist, and Lab Technician. \n\nFirst, I need to figure out how to distribute the salaries. The MonthlyIncome has a mean of around 49.1, but the data includes negative values, which might be an error. W",
+          "cited_columns": [
+            "Age",
+            "JobRole",
+            "MonthlyIncome"
+          ],
+          "reward": 0.5131,
+          "done": true
+        },
+        {
+          "domain": "pm",
+          "persona": "Executive",
+          "question": "How is resource utilization across teams?",
+          "answer": "<think>\nOkay, so the user is asking about resource utilization across teams, and they want the answer tailored for an executive persona. Let me start by understanding the data provided.\n\nFirst, the columns available include TaskID, ProjectName, Assignee, Status, Priority, DueDate, EstimatedHours, ActualHours, Dependencies, Milestone, RiskFlag, and CompletionPct. The column stats show that there are 100 tasks in total. The Assignee column has counts for different people, like Grace with 17 tasks,",
+          "cited_columns": [
+            "TaskID",
+            "ProjectName",
+            "Assignee",
+            "Status",
+            "Priority",
+            "DueDate",
+            "EstimatedHours",
+            "ActualHours",
+            "Dependencies",
+            "Milestone",
+            "RiskFlag",
+            "CompletionPct"
+          ],
+          "reward": 0.346,
+          "done": true
+        },
+        {
+          "domain": "hr",
+          "persona": "Manager",
+          "question": "How does overtime affect job satisfaction?",
+          "answer": "<think>\nOkay, the user is a manager asking how overtime affects job satisfaction. They want actionable insights related to team performance and operational health. Let me look at the available data columns. The relevant ones are OverTime and JobSatisfaction. \n\nFirst, I need to check if there's a correlation between OverTime and JobSatisfaction. The dataset has 100 entries. Let me think about how to approach this. Since the user is a manager, they probably need clear, actionable findings. Maybe s",
+          "cited_columns": [
+            "Age",
+            "JobSatisfaction",
+            "OverTime"
+          ],
+          "reward": 0.895,
+          "done": true
+        }
+      ],
+      "summary": {
+        "reward_mean": 0.5847,
+        "reward_std": 0.2814,
+        "n_valid": 3,
+        "n_total": 3
+      }
+    }
+  }
+}

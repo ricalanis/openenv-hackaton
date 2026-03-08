@@ -1,5 +1,55 @@
 # DataSage Changelog
 
+## 2026-03-08 - Inference Notebook for GRPO Model Evaluation
+
+**New:** Created standalone Colab-compatible notebook (`demo/inference/datasage_inference.ipynb`) for running fine-tuned DataSage LoRA models on GPU and generating evaluation data.
+
+### Notebook Structure (13 cells)
+| # | Content |
+|---|---------|
+| 0 | Markdown header + Colab badge |
+| 1 | `!pip install unsloth trl wandb requests datasets huggingface_hub` |
+| 2 | API keys (Colab Secrets or env vars) |
+| 3 | Configuration (model repos, env URLs, W&B run IDs, inference settings) |
+| 4-5 | W&B training data export from 3 runs (`xuwyjpe6`, `orww3s2q`, `2mltqk5w`) |
+| 6 | Load base model via Unsloth (`FastLanguageModel.from_pretrained`) |
+| 7 | System prompts + action parsers (inlined from training pipeline) |
+| 8 | Environment helpers (`/web/reset`, `/web/step` endpoints) |
+| 9 | Inference engine (generate_response + episode runners per task) |
+| 10-12 | Run inference: cleaning (4 domains x 3 episodes), enrichment (4x3), answering (4 domains x 3 personas) |
+| 13 | Base model comparison (same episodes without LoRA) |
+| 14-15 | Aggregate results + export JSON + visualizations |
+| 16 | Download files (Colab auto-download) |
+
+### Outputs
+- `evaluation_results.json` — Full results with per-domain/per-persona breakdowns
+- `wandb_training_data.json` — Exported W&B metrics from all 3 GRPO training runs
+- `wandb_training_curves.png` — Training reward curves visualization
+- `datasage_vs_base_comparison.png` — Bar chart comparing fine-tuned vs base model
+
+## 2026-03-08 - Multi-Model Demo with LangGraph Agentic System
+
+**New:** Built a full interactive demo (`demo/`) with LangGraph agentic system comparing GPT-4o-mini, Qwen3-8B, and GRPO fine-tuned DataSage models. Ran **real benchmarks** against live HF Space environments.
+
+### Components
+- **LangGraph Agent** (`demo/backend/agent.py`): StateGraph with initialize → select_action → execute_action → evaluate loop, hitting live HF Space `/web/reset` and `/web/step` endpoints
+- **Model Abstraction** (`demo/backend/models.py`): Pluggable providers - OpenAI (GPT-4o-mini) and HuggingFace Inference via fireworks-ai (Qwen3-8B), with Qwen3 `<think>` tag stripping
+- **Real Benchmark Runner** (`demo/run_real_benchmarks.py`): Runs actual episodes against live environments, collects real metrics
+- **Standard Benchmarks** (`demo/backend/standard_benchmarks.py`): MMLU, HumanEval, GSM8K, ARC-Challenge, HellaSwag, TruthfulQA, Winogrande + 8 domain-specific benchmarks
+- **Gradio UI** (`demo/app.py`): 5-tab dashboard clearly labeling REAL vs PROJECTED results
+
+### Real Benchmark Results (from live HF Space environments)
+- **Answering** (clear differentiator): GPT-4o-mini: **0.712** vs Qwen3-8B: **0.515** mean reward (+38%)
+- **Cleaning**: Both models ~0.96 reward (env starts above done threshold, 1-step episodes)
+- **Enrichment**: Both models 0.20 coverage (1/5 enrichments per episode)
+- DataSage fine-tuned models (LoRA adapters) require GPU inference, scores are projected
+
+### Key Findings
+- Answering task provides the strongest model differentiation
+- Cleaning environment is trivially easy for any model (DQ starts at 0.96+)
+- Enrichment equally hard for both - models struggle with multi-step enrichment chains
+- DataSage GRPO training specifically targets these failure modes
+
 ## 2026-03-08 - Fix GRPO Completion Mask Misalignment (94 vs 42)
 
 **Problem:** After fixing prompt length, GRPOTrainer crashed with `RuntimeError: tensor a (94) != tensor b (42)` in `masked_batch_mean`. Neither value matched `max_completion_length=256`.
