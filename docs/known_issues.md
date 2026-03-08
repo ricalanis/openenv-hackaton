@@ -16,6 +16,14 @@
 
 **How to avoid:** Always set `max_prompt_length` large enough to cover the actual tokenized prompts. For DataSage env observations, 1024 tokens covers all domains. Verify with: `len(tokenizer.apply_chat_template(prompt, tokenize=True))` on a few examples.
 
+## 2026-03-08 - GRPO completion mask misalignment with gradient_accumulation_steps
+
+**What happened:** `RuntimeError: tensor a (94) != tensor b (42)` in `masked_batch_mean`. Neither value equaled `max_completion_length`.
+
+**Root cause:** Unsloth bug #3149 — ignores `gradient_accumulation_steps` when checking `batch_size % num_generations`. Auto-adjusts batch_size incorrectly, causing completion masks from one prompt to be applied to a different prompt's completions.
+
+**How to avoid:** Use `gradient_accumulation_steps=1` with Unsloth's GRPOTrainer (matches their reference notebook). If you need larger effective batches, increase `num_generations` instead.
+
 **References:**
 - [Unsloth GRPO blog](https://www.unsloth.ai/blog/grpo)
 - [GRPOTrainer tensor shape error (TRL #2878)](https://github.com/huggingface/trl/issues/2878)

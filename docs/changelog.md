@@ -1,5 +1,13 @@
 # DataSage Changelog
 
+## 2026-03-08 - Fix GRPO Completion Mask Misalignment (94 vs 42)
+
+**Problem:** After fixing prompt length, GRPOTrainer crashed with `RuntimeError: tensor a (94) != tensor b (42)` in `masked_batch_mean`. Neither value matched `max_completion_length=256`.
+
+**Root cause:** [Unsloth bug #3149](https://github.com/unslothai/unsloth/issues/3149) — GRPOTrainer ignores `gradient_accumulation_steps` when validating batch size divisibility by `num_generations`. With `batch_size=1, accumulation=8, num_generations=4`, Unsloth auto-adjusted batch_size to 4, making effective batch `4*8=32` instead of `1*8=8`. This misaligned which `completion_mask` was applied to which completion's values.
+
+**Fix:** Set `gradient_accumulation_steps=1` and `num_generations=8` to match [Unsloth's official reference](https://colab.research.google.com/github/unslothai/notebooks/blob/main/nb/Qwen2.5_(3B)-GRPO.ipynb). Updated all 3 notebooks, 3 .py scripts, and shared config.
+
 ## 2026-03-08 - Fix GRPO Completion/Mask Size Mismatch (338 vs 256)
 
 **Problem:** After enabling `fast_inference`+`use_vllm`, GRPOTrainer crashed with `RuntimeError: The size of tensor a (338) must match the size of tensor b (256)` in `masked_batch_mean`. The 256 = `max_completion_length`, the 338 = actual completion tokens.
