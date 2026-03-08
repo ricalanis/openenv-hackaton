@@ -1,0 +1,22 @@
+{
+  "name": "train-stage1-cleaning",
+  "id": "train-stage1-cleaning",
+  "billing": {"deploymentPlan": "nf-gpu-hack-16-64"},
+  "backoffLimit": 0,
+  "runOnSourceChange": "never",
+  "activeDeadlineSeconds": 7200,
+  "deployment": {
+    "storage": {
+      "ephemeralStorage": {"storageSize": 51200},
+      "shmSize": 16384
+    },
+    "docker": {
+      "configType": "customEntrypoint",
+      "customEntrypoint": "/bin/bash",
+      "customCommand": "-c 'cd /workspace && git clone https://github.com/ricalanis/openenv-hackaton.git app && cd app && bash deployment/train_stage1.sh'"
+    },
+    "external": {
+      "imagePath": "nvcr.io/nvidia/pytorch:24.01-py3"
+    }
+  }
+}

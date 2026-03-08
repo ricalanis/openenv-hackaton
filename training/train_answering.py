@@ -16,9 +16,11 @@ Optional: PATRONUS_API_KEY for Patronus Lynx hallucination evaluation.
 """
 
 import json
+import logging
 import os
 import re
 import sys
+import time
 
 # Load .env for PATRONUS_API_KEY, HF_TOKEN, WANDB_API_KEY
 try:
@@ -26,6 +28,16 @@ try:
     load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
 except ImportError:
     pass
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+logger = logging.getLogger(__name__)
+logger.info("=" * 60)
+logger.info("DataSage Stage 3: Answering GRPO Training")
+logger.info("=" * 60)
 
 import torch
 from datasets import Dataset
@@ -50,8 +62,19 @@ from environments.answering.models import AnsweringAction
 ENV_URL = SPACE_URLS["answering"]
 STAGE_CONFIG = TRAINING_CONFIGS["answering"]
 
+logger.info(f"Environment URL: {ENV_URL}")
+logger.info(f"Base model: {BASE_MODEL}")
+logger.info(f"Config: {STAGE_CONFIG}")
+logger.info(f"Patronus API key: {'SET' if os.environ.get('PATRONUS_API_KEY') else 'NOT SET (using local fallback)'}")
+
 # ── Model loading via Unsloth ────────────────────────────────────────
 from unsloth import FastLanguageModel
+
+if torch.cuda.is_available():
+    logger.info(f"GPU: {torch.cuda.get_device_name(0)}")
+    logger.info(f"VRAM: {torch.cuda.get_device_properties(0).total_mem / 1e9:.1f} GB")
+logger.info("Loading model via Unsloth...")
+t0 = time.time()
 
 model, tokenizer = FastLanguageModel.from_pretrained(
     model_name=BASE_MODEL,
@@ -73,6 +96,9 @@ model = FastLanguageModel.get_peft_model(
 
 if tokenizer.pad_token is None:
     tokenizer.pad_token = tokenizer.eos_token
+
+logger.info(f"Model loaded in {time.time() - t0:.1f}s")
+logger.info(f"Trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad):,}")
 
 # ── System prompt ────────────────────────────────────────────────────
 SYSTEM_PROMPT = """\
@@ -190,6 +216,7 @@ dataset = Dataset.from_dict({
     "prompt": [make_conversation(p) for p in TASK_PROMPTS]
 })
 
+logger.info(f"Dataset size: {len(dataset)} prompts across 4 domains x 3 personas")
 
 # ── Local faithfulness scoring (fallback for Patronus) ───────────────
 def local_faithfulness_fn(completions: list[str], **kwargs) -> list[float]:
@@ -279,7 +306,7 @@ def env_reward_fn(completions: list[str], **kwargs) -> list[float]:
                 result = client.step(action)
                 rewards.append(float(result.reward or 0.0))
         except Exception as e:
-            print(f"Env error: {e}")
+            logger.warning(f"Env error: {e}")
             rewards.append(0.0)
     return rewards
 
@@ -385,16 +412,25 @@ trainer = GRPOTrainer(
     ],
 )
 
-print("Starting Stage 3 (Answering) GRPO training...")
+logger.info("=" * 60)
+logger.info("Starting Stage 3 (Answering) GRPO training...")
+logger.info(f"  Epochs: {training_args.num_train_epochs}")
+logger.info(f"  Batch size: {training_args.per_device_train_batch_size}")
+logger.info(f"  Learning rate: {training_args.learning_rate}")
+logger.info(f"  Reward funcs: env, patronus_lynx, json_format, persona")
+logger.info("=" * 60)
+t_start = time.time()
 trainer.train()
+logger.info(f"Training completed in {(time.time() - t_start) / 60:.1f} minutes")
 
 # ── Save & push to Hub ───────────────────────────────────────────────
 output_dir = "./outputs/answering-grpo-final"
 trainer.save_model(output_dir)
 tokenizer.save_pretrained(output_dir)
-print(f"Training complete! Model saved to {output_dir}")
+logger.info(f"Training complete! Model saved to {output_dir}")
 
 hf_repo = HF_MODEL_REPOS["answering"]
-print(f"Pushing to Hub: {hf_repo}")
+logger.info(f"Pushing to Hub: {hf_repo}")
 trainer.push_to_hub(hf_repo)
-print(f"Model pushed to https://huggingface.co/{hf_repo}")
+logger.info(f"Model pushed to https://huggingface.co/{hf_repo}")
+logger.info("Stage 3 (Answering) COMPLETE")

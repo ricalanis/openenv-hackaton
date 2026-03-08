@@ -1,0 +1,22 @@
+{
+  "name": "test-clone",
+  "id": "test-clone",
+  "billing": {"deploymentPlan": "nf-gpu-hack-16-64"},
+  "backoffLimit": 0,
+  "runOnSourceChange": "never",
+  "activeDeadlineSeconds": 300,
+  "deployment": {
+    "storage": {
+      "ephemeralStorage": {"storageSize": 20480},
+      "shmSize": 8192
+    },
+    "docker": {
+      "configType": "customEntrypoint",
+      "customEntrypoint": "/bin/bash",
+      "customCommand": "-c 'cd /workspace && git clone https://github.com/ricalanis/openenv-hackaton.git app && ls app/ && nvidia-smi && echo CLONE_TEST_DONE'"
+    },
+    "external": {
+      "imagePath": "nvcr.io/nvidia/pytorch:24.01-py3"
+    }
+  }
+}

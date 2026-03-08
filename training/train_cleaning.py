@@ -12,13 +12,26 @@ Requires: GPU (H100 recommended), HF_TOKEN, WANDB_API_KEY env vars.
 """
 
 import json
+import logging
 import os
 import re
 import sys
+import time
 
 import torch
 from datasets import Dataset
 from trl import GRPOConfig, GRPOTrainer
+
+# ── Logging setup ─────────────────────────────────────────────────────
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+logger = logging.getLogger(__name__)
+logger.info("=" * 60)
+logger.info("DataSage Stage 1: Cleaning GRPO Training")
+logger.info("=" * 60)
 
 # ── Append project root to path so imports work ──────────────────────
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -39,8 +52,22 @@ from environments.cleaning.models import CleaningAction
 ENV_URL = SPACE_URLS["cleaning"]
 STAGE_CONFIG = TRAINING_CONFIGS["cleaning"]
 
+logger.info(f"Environment URL: {ENV_URL}")
+logger.info(f"Base model: {BASE_MODEL}")
+logger.info(f"Config: {STAGE_CONFIG}")
+
+# ── GPU info ──────────────────────────────────────────────────────────
+if torch.cuda.is_available():
+    logger.info(f"GPU: {torch.cuda.get_device_name(0)}")
+    logger.info(f"VRAM: {torch.cuda.get_device_properties(0).total_mem / 1e9:.1f} GB")
+else:
+    logger.warning("No GPU detected! Training will be very slow.")
+
 # ── Model loading via Unsloth ────────────────────────────────────────
 from unsloth import FastLanguageModel
+
+logger.info("Loading model via Unsloth...")
+t0 = time.time()
 
 model, tokenizer = FastLanguageModel.from_pretrained(
     model_name=BASE_MODEL,
@@ -62,6 +89,10 @@ model = FastLanguageModel.get_peft_model(
 
 if tokenizer.pad_token is None:
     tokenizer.pad_token = tokenizer.eos_token
+
+logger.info(f"Model loaded in {time.time() - t0:.1f}s")
+logger.info(f"Model parameters: {sum(p.numel() for p in model.parameters()):,}")
+logger.info(f"Trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad):,}")
 
 # ── System prompt ────────────────────────────────────────────────────
 SYSTEM_PROMPT = """\
@@ -179,14 +210,17 @@ dataset = Dataset.from_dict({
     "prompt": [make_conversation(p) for p in filled_prompts]
 })
 
+logger.info(f"Dataset size: {len(dataset)} prompts across 4 domains")
 
 # ── Reward functions ─────────────────────────────────────────────────
+_reward_call_count = {"env": 0, "json": 0, "reasoning": 0}
 def env_reward_fn(completions: list[str], **kwargs) -> list[float]:
     """
     Step through the Cleaning environment for each completion.
     Primary reward signal from the OpenEnv environment.
     """
     rewards = []
+    _reward_call_count["env"] += 1
     for text in completions:
         try:
             action_dict = parse_cleaning_action(text)
@@ -201,8 +235,10 @@ def env_reward_fn(completions: list[str], **kwargs) -> list[float]:
                 result = client.step(action)
                 rewards.append(float(result.reward or 0.0))
         except Exception as e:
-            print(f"Env error: {e}")
+            logger.warning(f"Env error: {e}")
             rewards.append(0.0)
+    if _reward_call_count["env"] % 10 == 1:
+        logger.info(f"[env_reward] call #{_reward_call_count['env']}, batch avg={sum(rewards)/len(rewards):.3f}")
     return rewards
 
 
@@ -285,16 +321,28 @@ trainer = GRPOTrainer(
     ],
 )
 
-print("Starting Stage 1 (Cleaning) GRPO training...")
+logger.info("=" * 60)
+logger.info("Starting Stage 1 (Cleaning) GRPO training...")
+logger.info(f"  Epochs: {training_args.num_train_epochs}")
+logger.info(f"  Batch size: {training_args.per_device_train_batch_size}")
+logger.info(f"  Grad accum: {training_args.gradient_accumulation_steps}")
+logger.info(f"  Num generations: {training_args.num_generations}")
+logger.info(f"  Learning rate: {training_args.learning_rate}")
+logger.info("=" * 60)
+t_start = time.time()
 trainer.train()
+logger.info(f"Training completed in {(time.time() - t_start) / 60:.1f} minutes")
 
 # ── Save & push to Hub ───────────────────────────────────────────────
 output_dir = "./outputs/cleaning-grpo-final"
 trainer.save_model(output_dir)
 tokenizer.save_pretrained(output_dir)
-print(f"Training complete! Model saved to {output_dir}")
+logger.info(f"Model saved to {output_dir}")
 
 hf_repo = HF_MODEL_REPOS["cleaning"]
-print(f"Pushing to Hub: {hf_repo}")
+logger.info(f"Pushing to Hub: {hf_repo}")
 trainer.push_to_hub(hf_repo)
-print(f"Model pushed to https://huggingface.co/{hf_repo}")
+logger.info(f"Model pushed to https://huggingface.co/{hf_repo}")
+logger.info("=" * 60)
+logger.info("Stage 1 (Cleaning) COMPLETE")
+logger.info("=" * 60)
