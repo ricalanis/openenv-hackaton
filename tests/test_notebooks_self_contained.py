@@ -156,6 +156,14 @@ def test_has_get_text_helper(name):
 
 
 @pytest.mark.parametrize('name', NOTEBOOK_NAMES)
+def test_step_payload_not_wrapped(name):
+    """Step calls must send action fields at top level, not nested in {"action": ...}."""
+    src = _get_all_source(_load_notebook(name))
+    assert 'json={"action"' not in src, \
+        f"{name} wraps step payload in {{\"action\": ...}} — server expects top-level fields"
+
+
+@pytest.mark.parametrize('name', NOTEBOOK_NAMES)
 def test_pip_install_no_pydantic(name):
     nb = _load_notebook(name)
     pip_cell = ''.join(nb['cells'][1]['source'])
