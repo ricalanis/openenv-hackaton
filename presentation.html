@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DataSage — OpenEnv Hackathon 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --black: #111;
+    --gray-700: #374151;
+    --gray-500: #6b7280;
+    --gray-400: #9ca3af;
+    --gray-200: #e5e7eb;
+    --gray-100: #f3f4f6;
+    --accent: #111;
+    --cleaning: #d97706;
+    --enrichment: #dc2626;
+    --answering: #2563eb;
+    --green: #059669;
+  }
+
+  html { font-size: 16px; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #fff;
+    color: var(--black);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  /* ── Slide system ── */
+  .deck { position: relative; width: 100vw; height: 100vh; }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 6vh 8vw;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.45s ease;
+  }
+  .slide.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* ── Progress bar ── */
+  .progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: var(--black);
+    transition: width 0.4s ease;
+    z-index: 100;
+  }
+
+  /* ── Slide counter ── */
+  .counter {
+    position: fixed;
+    bottom: 2.5vh;
+    right: 4vw;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--gray-400);
+    z-index: 100;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Nav hint ── */
+  .nav-hint {
+    position: fixed;
+    bottom: 2.5vh;
+    left: 4vw;
+    font-size: 0.7rem;
+    color: var(--gray-400);
+    z-index: 100;
+  }
+
+  /* ── Typography ── */
+  h1 {
+    font-size: clamp(2.8rem, 5vw, 4.5rem);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.5rem;
+  }
+  h2 {
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    margin-bottom: 1.2rem;
+  }
+  h3 {
+    font-size: clamp(1.1rem, 1.8vw, 1.4rem);
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 0.6rem;
+  }
+  p, li {
+    font-size: clamp(0.95rem, 1.4vw, 1.15rem);
+    line-height: 1.6;
+    color: var(--gray-700);
+  }
+  .subtitle {
+    font-size: clamp(1.1rem, 1.8vw, 1.5rem);
+    font-weight: 400;
+    color: var(--gray-500);
+    line-height: 1.5;
+    max-width: 50ch;
+  }
+  .big-number {
+    font-size: clamp(3rem, 6vw, 5.5rem);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+  .label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--gray-500);
+  }
+  .tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.25em 0.7em;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 4px;
+    color: var(--gray-500);
+    margin-right: 0.5em;
+    margin-bottom: 0.4em;
+  }
+
+  /* ── Layout helpers ── */
+  .row { display: flex; gap: 3vw; align-items: flex-start; }
+  .col { flex: 1; min-width: 0; }
+  .col-narrow { flex: 0 0 38%; }
+  .col-wide { flex: 0 0 58%; }
+  .gap-sm { gap: 1.5vw; }
+  .mt-1 { margin-top: 0.8rem; }
+  .mt-2 { margin-top: 1.5rem; }
+  .mt-3 { margin-top: 2.5rem; }
+  .mb-1 { margin-bottom: 0.8rem; }
+
+  /* ── Pipeline diagram ── */
+  .pipeline-flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 2rem 0;
+  }
+  .pipeline-stage {
+    flex: 1;
+    padding: 1.5rem 1.2rem;
+    border: 2px solid;
+    border-radius: 8px;
+    text-align: center;
+    position: relative;
+  }
+  .pipeline-stage h3 { margin-bottom: 0.3rem; font-size: 1rem; }
+  .pipeline-stage p { font-size: 0.8rem; color: var(--gray-500); margin: 0; }
+  .pipeline-stage .stage-metric {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-top: 0.5rem;
+    line-height: 1;
+  }
+  .pipeline-arrow {
+    font-size: 1.5rem;
+    color: var(--gray-400);
+    flex-shrink: 0;
+    padding: 0 0.5rem;
+  }
+  .stage-cleaning { border-color: var(--cleaning); }
+  .stage-cleaning .stage-metric { color: var(--cleaning); }
+  .stage-enrichment { border-color: var(--enrichment); }
+  .stage-enrichment .stage-metric { color: var(--enrichment); }
+  .stage-answering { border-color: var(--answering); }
+  .stage-answering .stage-metric { color: var(--answering); }
+  .stage-insight { border-color: var(--green); background: var(--green); color: #fff; }
+  .stage-insight p { color: rgba(255,255,255,0.8); }
+  .stage-insight .stage-metric { color: #fff; }
+
+  .domains-row {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+  }
+  .domain-chip {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.35em 1em;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 100px;
+    color: var(--gray-700);
+  }
+
+  /* ── Bar chart ── */
+  .chart-group { margin-bottom: 1.8rem; }
+  .chart-group-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--gray-500);
+    margin-bottom: 0.6rem;
+  }
+  .bar-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.45rem;
+    height: 1.8rem;
+  }
+  .bar-label {
+    width: 130px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--gray-700);
+    text-align: right;
+    padding-right: 1rem;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .bar-track {
+    flex: 1;
+    height: 100%;
+    background: var(--gray-100);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    display: flex;
+    align-items: center;
+    padding-right: 0.6rem;
+    justify-content: flex-end;
+    min-width: 2.5rem;
+  }
+  .bar-value {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+  }
+  .bar-value-outside {
+    font-size: 0.72rem;
+    font-weight: 700;
+    margin-left: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  /* ── Stat cards ── */
+  .stats-row {
+    display: flex;
+    gap: 2vw;
+    margin: 1.5rem 0;
+  }
+  .stat-card {
+    flex: 1;
+    padding: 1.2rem 1.5rem;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 8px;
+    text-align: center;
+  }
+  .stat-card .big-number {
+    font-size: clamp(2rem, 4vw, 3.2rem);
+  }
+  .stat-card .label {
+    margin-top: 0.3rem;
+  }
+
+  /* ── Comparison table ── */
+  .comp-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+  }
+  .comp-table th {
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gray-500);
+    padding: 0.6rem 1rem;
+    border-bottom: 2px solid var(--black);
+  }
+  .comp-table td {
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--gray-200);
+    font-variant-numeric: tabular-nums;
+  }
+  .comp-table tr.highlight td {
+    font-weight: 700;
+    background: var(--gray-100);
+  }
+  .comp-table .winner {
+    font-weight: 800;
+  }
+
+  /* ── Links grid ── */
+  .links-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  .link-card {
+    padding: 1.2rem 1.5rem;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--black);
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .link-card:hover {
+    border-color: var(--black);
+    background: var(--gray-100);
+  }
+  .link-card h3 { font-size: 0.95rem; margin-bottom: 0.2rem; }
+  .link-card p { font-size: 0.78rem; color: var(--gray-500); margin: 0; }
+  .link-card .link-url {
+    font-size: 0.72rem;
+    color: var(--gray-400);
+    margin-top: 0.4rem;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    word-break: break-all;
+  }
+
+  /* ── Key insight callout ── */
+  .callout {
+    border-left: 4px solid var(--black);
+    padding: 1rem 1.5rem;
+    background: var(--gray-100);
+    border-radius: 0 6px 6px 0;
+    margin: 1.5rem 0;
+  }
+  .callout p {
+    font-size: clamp(0.95rem, 1.3vw, 1.1rem);
+    font-weight: 500;
+    color: var(--black);
+    font-style: italic;
+  }
+
+  /* ── Before/After ── */
+  .before-after {
+    display: flex;
+    gap: 2rem;
+    align-items: stretch;
+    margin: 1.5rem 0;
+  }
+  .ba-card {
+    flex: 1;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1.5px solid var(--gray-200);
+  }
+  .ba-card.before { }
+  .ba-card.after { border-color: var(--black); background: var(--gray-100); }
+  .ba-card h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-500); margin-bottom: 0.8rem; }
+  .ba-card .ba-number { font-size: 2.5rem; font-weight: 900; line-height: 1; margin-bottom: 0.3rem; }
+  .ba-card .ba-detail { font-size: 0.85rem; color: var(--gray-500); }
+
+  /* ── Persona pills ── */
+  .persona-row {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  .persona-pill {
+    flex: 1;
+    text-align: center;
+    padding: 0.8rem;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 8px;
+  }
+  .persona-pill .persona-name { font-size: 0.78rem; font-weight: 600; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.08em; }
+  .persona-pill .persona-score { font-size: 1.8rem; font-weight: 800; margin-top: 0.2rem; }
+  .persona-pill .persona-base { font-size: 0.72rem; color: var(--gray-400); }
+
+  /* ── Training spec ── */
+  .spec-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.8rem;
+    margin-top: 1rem;
+  }
+  .spec-item {
+    padding: 0.8rem;
+    background: var(--gray-100);
+    border-radius: 6px;
+  }
+  .spec-item .label { font-size: 0.65rem; margin-bottom: 0.2rem; }
+  .spec-item .spec-value { font-size: 0.95rem; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<div class="counter" id="counter"></div>
+<div class="nav-hint">arrows / space to navigate</div>
+
+<div class="deck" id="deck">
+
+<!-- ████████ SLIDE 1: TITLE ████████ -->
+<div class="slide active" data-slide="0">
+  <div>
+    <div class="label mb-1">OpenEnv Hackathon 2026</div>
+    <h1>DataSage</h1>
+    <p class="subtitle">
+      A 3B model trained via GRPO to clean, enrich, and answer questions about enterprise data
+      &mdash; outperforming GPT-4o-mini on end-to-end pipeline tasks.
+    </p>
+
+    <div class="stats-row mt-3">
+      <div class="stat-card">
+        <div class="big-number">3</div>
+        <div class="label">RL Environments</div>
+      </div>
+      <div class="stat-card">
+        <div class="big-number">4</div>
+        <div class="label">Enterprise Domains</div>
+      </div>
+      <div class="stat-card">
+        <div class="big-number">3</div>
+        <div class="label">LoRA Adapters</div>
+      </div>
+      <div class="stat-card">
+        <div class="big-number">192</div>
+        <div class="label">Training Steps</div>
+      </div>
+    </div>
+
+    <div class="mt-2">
+      <span class="tag">Qwen 2.5-3B</span>
+      <span class="tag">GRPO</span>
+      <span class="tag">Unsloth</span>
+      <span class="tag">4-bit QLoRA</span>
+      <span class="tag">OpenEnv 0.2.1</span>
+    </div>
+
+    <p class="mt-2" style="font-size: 0.85rem; color: var(--gray-400);">Ricardo Alanis &middot; Israel Mata</p>
+  </div>
+</div>
+
+<!-- ████████ SLIDE 2: THE THESIS ████████ -->
+<div class="slide" data-slide="1">
+  <div>
+    <div class="label mb-1">The Thesis</div>
+    <h2>Full-Stack Data Science<br>with Agentic Pipelines</h2>
+
+    <p class="subtitle" style="max-width: 60ch;">
+      AI agents absorb the mechanical breadth so one human can go deep on what matters &mdash;
+      asking the right question, interpreting results, making decisions.
+    </p>
+
+    <div class="before-after mt-3">
+      <div class="ba-card before">
+        <h3>Before</h3>
+        <div class="ba-number">23 days</div>
+        <div class="ba-detail">5 people &middot; question to insight</div>
+        <div class="ba-detail" style="margin-top:0.5rem;">80% of time spent on plumbing: SQL, cleaning, formatting, pipelines</div>
+      </div>
+      <div class="ba-card after">
+        <h3>After &mdash; with DataSage</h3>
+        <div class="ba-number">2&ndash;4 hrs</div>
+        <div class="ba-detail">1 person + agents &middot; validated insight</div>
+        <div class="ba-detail" style="margin-top:0.5rem;">Human defines the question &amp; quality gates. Agents handle execution.</div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <p>"The question is not how many data scientists you need. It's how many questions one data scientist can answer."</p>
+    </div>
+  </div>
+</div>
+
+<!-- ████████ SLIDE 3: THE PIPELINE ████████ -->
+<div class="slide" data-slide="2">
+  <div>
+    <div class="label mb-1">Architecture</div>
+    <h2>Three-Stage Medallion Pipeline</h2>
+
+    <div class="pipeline-flow">
+      <div class="pipeline-stage stage-cleaning">
+        <h3>Cleaning</h3>
+        <p>Bronze &rarr; Silver</p>
+        <div class="stage-metric">0.962</div>
+        <p>DQ Score</p>
+        <p style="margin-top:0.4rem; font-size:0.7rem;">15 steps &middot; 6 ops</p>
+      </div>
+      <div class="pipeline-arrow">&rarr;</div>
+      <div class="pipeline-stage stage-enrichment">
+        <h3>Enrichment</h3>
+        <p>Silver &rarr; Gold</p>
+        <div class="stage-metric">0.200</div>
+        <p>Coverage</p>
+        <p style="margin-top:0.4rem; font-size:0.7rem;">12 steps &middot; 20 sources</p>
+      </div>
+      <div class="pipeline-arrow">&rarr;</div>
+      <div class="pipeline-stage stage-answering">
+        <h3>Answering</h3>
+        <p>Gold &rarr; Insight</p>
+        <div class="stage-metric">0.661</div>
+        <p>Reward</p>
+        <p style="margin-top:0.4rem; font-size:0.7rem;">Persona-aligned</p>
+      </div>
+      <div class="pipeline-arrow">&rarr;</div>
+      <div class="pipeline-stage stage-insight">
+        <h3>E2E</h3>
+        <p>Pipeline Score</p>
+        <div class="stage-metric">0.613</div>
+        <p>#1 overall</p>
+      </div>
+    </div>
+
+    <div class="domains-row">
+      <div class="domain-chip">HR Analytics</div>
+      <div class="domain-chip">Sales CRM</div>
+      <div class="domain-chip">Project Management</div>
+      <div class="domain-chip">IT Operations</div>
+    </div>
+
+    <div class="row mt-3 gap-sm">
+      <div class="col">
+        <h3>Quality Gates at every boundary</h3>
+        <p style="font-size:0.85rem;">If a gate fails, the pipeline pauses for human review. Deterministic guardrails inside probabilistic workflows.</p>
+      </div>
+      <div class="col">
+        <h3>3 Personas shape the output</h3>
+        <div class="persona-row" style="margin-top:0.5rem;">
+          <div class="persona-pill">
+            <div class="persona-name">Executive</div>
+            <div class="persona-score">0.553</div>
+          </div>
+          <div class="persona-pill">
+            <div class="persona-name">Manager</div>
+            <div class="persona-score">0.793</div>
+          </div>
+          <div class="persona-pill">
+            <div class="persona-name">IC</div>
+            <div class="persona-score">0.746</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ████████ SLIDE 4: ENVIRONMENT DETAILS ████████ -->
+<div class="slide" data-slide="3">
+  <div>
+    <div class="label mb-1">Environment Design</div>
+    <h2>How Each Stage Works</h2>
+
+    <div class="row" style="gap:2vw; margin-top:1.5rem;">
+      <!-- CLEANING -->
+      <div class="col" style="border:2px solid var(--cleaning); border-radius:10px; padding:1.2rem;">
+        <h3 style="color:var(--cleaning); font-size:0.95rem; margin-bottom:0.5rem;">Stage 1: Cleaning</h3>
+        <p style="font-size:0.75rem; margin-bottom:0.6rem;">50-row corrupted dataset &rarr; up to 15 sequential fix actions</p>
+
+        <div style="font-size:0.7rem; margin-bottom:0.5rem;">
+          <div class="label" style="font-size:0.6rem; margin-bottom:0.3rem;">6 Operations</div>
+          <span class="tag" style="font-size:0.6rem; padding:0.15em 0.5em;">fill_null</span>
+          <span class="tag" style="font-size:0.6rem; padding:0.15em 0.5em;">fix_type</span>
+          <span class="tag" style="font-size:0.6rem; padding:0.15em 0.5em;">remove_duplicate</span>
+          <span class="tag" style="font-size:0.6rem; padding:0.15em 0.5em;">standardize</span>
+          <span class="tag" style="font-size:0.6rem; padding:0.15em 0.5em;">trim</span>
+          <span class="tag" style="font-size:0.6rem; padding:0.15em 0.5em;">correct_typo</span>
+        </div>
+
+        <div style="font-size:0.7rem; margin-bottom:0.4rem;">
+          <div class="label" style="font-size:0.6rem; margin-bottom:0.2rem;">Corruptions (15% rate)</div>
+          <span style="color:var(--gray-500);">Nulls &middot; Type mismatches &middot; Typos &middot; Duplicates &middot; Whitespace</span>
+        </div>
+
+        <div style="background:var(--gray-100); border-radius:6px; padding:0.6rem; font-size:0.68rem; font-family:monospace; margin-bottom:0.4rem;">
+          <div style="color:var(--gray-500); font-size:0.6rem; margin-bottom:0.2rem;">REWARD</div>
+          0.50 &times; DQ<sub>after</sub> + 0.50 &times; min(&Delta; &times; 5, 1.0)
+        </div>
+        <div style="background:var(--gray-100); border-radius:6px; padding:0.6rem; font-size:0.68rem; font-family:monospace;">
+          <div style="color:var(--gray-500); font-size:0.6rem; margin-bottom:0.2rem;">DQ SCORE</div>
+          0.40 &times; completeness + 0.35 &times; consistency + 0.25 &times; uniqueness
+        </div>
+        <p style="font-size:0.65rem; color:var(--gray-400); margin-top:0.4rem;">Ends: DQ &gt; 0.95 or step &ge; 15</p>
+      </div>
+
+      <!-- ENRICHMENT -->
+      <div class="col" style="border:2px solid var(--enrichment); border-radius:10px; padding:1.2rem;">
+        <h3 style="color:var(--enrichment); font-size:0.95rem; margin-bottom:0.5rem;">Stage 2: Enrichment</h3>
+        <p style="font-size:0.75rem; margin-bottom:0.6rem;">Clean dataset &rarr; add derived fields from 20 domain sources</p>
+
+        <div style="font-size:0.7rem; margin-bottom:0.5rem;">
+          <div class="label" style="font-size:0.6rem; margin-bottom:0.3rem;">5 sources per domain (20 total)</div>
+          <table style="font-size:0.65rem; width:100%; border-collapse:collapse;">
+            <tr style="border-bottom:1px solid var(--gray-200);">
+              <td style="padding:0.2rem 0; font-weight:600; width:35px;">HR</td>
+              <td style="padding:0.2rem 0; color:var(--gray-500);">salary_band, tenure_risk, flight_risk_score...</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--gray-200);">
+              <td style="padding:0.2rem 0; font-weight:600;">Sales</td>
+              <td style="padding:0.2rem 0; color:var(--gray-500);">deal_size_category, velocity_score, win_prob...</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--gray-200);">
+              <td style="padding:0.2rem 0; font-weight:600;">PM</td>
+              <td style="padding:0.2rem 0; color:var(--gray-500);">schedule_risk, burndown_rate, delay_prob...</td>
+            </tr>
+            <tr>
+              <td style="padding:0.2rem 0; font-weight:600;">IT Ops</td>
+              <td style="padding:0.2rem 0; color:var(--gray-500);">sla_compliance, mttr_band, severity_score...</td>
+            </tr>
+          </table>
+        </div>
+
+        <div style="background:var(--gray-100); border-radius:6px; padding:0.6rem; font-size:0.68rem; font-family:monospace;">
+          <div style="color:var(--gray-500); font-size:0.6rem; margin-bottom:0.2rem;">REWARD</div>
+          coverage = fields_added / total_available
+        </div>
+        <p style="font-size:0.65rem; color:var(--gray-400); margin-top:0.4rem;">Ends: coverage &gt; 0.80 or step &ge; 12</p>
+      </div>
+
+      <!-- ANSWERING -->
+      <div class="col" style="border:2px solid var(--answering); border-radius:10px; padding:1.2rem;">
+        <h3 style="color:var(--answering); font-size:0.95rem; margin-bottom:0.5rem;">Stage 3: Answering</h3>
+        <p style="font-size:0.75rem; margin-bottom:0.6rem;">Enriched data + persona + question &rarr; cited analytical answer</p>
+
+        <div style="font-size:0.7rem; margin-bottom:0.5rem;">
+          <div class="label" style="font-size:0.6rem; margin-bottom:0.3rem;">3 Personas</div>
+          <table style="font-size:0.65rem; width:100%; border-collapse:collapse;">
+            <tr style="border-bottom:1px solid var(--gray-200);">
+              <td style="padding:0.2rem 0; font-weight:600; width:60px;">Executive</td>
+              <td style="padding:0.2rem 0; color:var(--gray-500);">ROI, revenue, trend, margin, portfolio</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--gray-200);">
+              <td style="padding:0.2rem 0; font-weight:600;">Manager</td>
+              <td style="padding:0.2rem 0; color:var(--gray-500);">team, performance, bottleneck, SLA</td>
+            </tr>
+            <tr>
+              <td style="padding:0.2rem 0; font-weight:600;">IC</td>
+              <td style="padding:0.2rem 0; color:var(--gray-500);">my, next step, deadline, assigned</td>
+            </tr>
+          </table>
+        </div>
+
+        <div style="background:var(--gray-100); border-radius:6px; padding:0.6rem; font-size:0.68rem; font-family:monospace; margin-bottom:0.4rem;">
+          <div style="color:var(--gray-500); font-size:0.6rem; margin-bottom:0.2rem;">REWARD</div>
+          0.30 &times; faithfulness + 0.70 &times; persona_alignment
+        </div>
+        <div style="font-size:0.65rem; color:var(--gray-500);">
+          <strong>Faithfulness:</strong> cited column validity + sample value refs<br>
+          <strong>Persona:</strong> keyword hits + formality + anti-keyword penalty
+        </div>
+        <p style="font-size:0.65rem; color:var(--gray-400); margin-top:0.4rem;">Single-step episode (1 action)</p>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top:1.2rem; margin-bottom:0;">
+      <p style="font-size:0.85rem;">"The challenge isn't any single step &mdash; it's that the model must learn 3 fundamentally different skills: diagnostic reasoning, knowledge application, and communication adaptation."</p>
+    </div>
+  </div>
+</div>
+
+<!-- ████████ SLIDE 5: FSDS CLEANING DEEP DIVE ████████ -->
+<div class="slide" data-slide="4">
+  <div>
+    <div class="label mb-1">Focused Environment</div>
+    <h2>FSDS Cleaning &mdash; Deep Dive</h2>
+    <p style="font-size:0.9rem; color:var(--gray-500); margin-bottom:1.2rem;">A standalone cleaning environment with curriculum learning, structured noise, and 6 quality gates.</p>
+
+    <div class="row" style="gap:2.5vw;">
+      <div class="col" style="flex:0 0 48%;">
+        <!-- Tasks -->
+        <h3 style="font-size:0.85rem; margin-bottom:0.5rem;">3 Task Types</h3>
+        <table class="comp-table" style="font-size:0.72rem; margin-top:0;">
+          <tr>
+            <th>Task</th>
+            <th>Type</th>
+            <th>Target</th>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">ecommerce_mobile</td>
+            <td>Classification</td>
+            <td><code style="font-size:0.68rem;">converted</code></td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">subscription_churn</td>
+            <td>Classification</td>
+            <td><code style="font-size:0.68rem;">churned</code></td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">delivery_eta</td>
+            <td>Regression</td>
+            <td><code style="font-size:0.68rem;">delivery_time_minutes</code></td>
+          </tr>
+        </table>
+
+        <!-- Noise Profiles -->
+        <h3 style="font-size:0.85rem; margin-top:1rem; margin-bottom:0.5rem;">Noise Injection Profiles</h3>
+        <table class="comp-table" style="font-size:0.68rem; margin-top:0;">
+          <tr>
+            <th>Profile</th>
+            <th>Missing</th>
+            <th>Dups</th>
+            <th>Outliers</th>
+            <th>Drift</th>
+          </tr>
+          <tr>
+            <td>Light</td><td>2%</td><td>2%</td><td>1%</td><td>3%</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">Medium</td><td>5%</td><td>3%</td><td>2%</td><td>6%</td>
+          </tr>
+          <tr>
+            <td>Heavy</td><td>8%</td><td>5%</td><td>4%</td><td>10%</td>
+          </tr>
+        </table>
+
+        <!-- 8 Operations -->
+        <h3 style="font-size:0.85rem; margin-top:1rem; margin-bottom:0.4rem;">8 Cleaning Operations</h3>
+        <div>
+          <span class="tag" style="font-size:0.58rem; padding:0.15em 0.4em;">drop_duplicates</span>
+          <span class="tag" style="font-size:0.58rem; padding:0.15em 0.4em;">replace_invalid_with_null</span>
+          <span class="tag" style="font-size:0.58rem; padding:0.15em 0.4em;">cast_numeric</span>
+          <span class="tag" style="font-size:0.58rem; padding:0.15em 0.4em;">cast_datetime</span>
+          <span class="tag" style="font-size:0.58rem; padding:0.15em 0.4em;">impute_numeric</span>
+          <span class="tag" style="font-size:0.58rem; padding:0.15em 0.4em;">impute_categorical</span>
+          <span class="tag" style="font-size:0.58rem; padding:0.15em 0.4em;">normalize_categories</span>
+          <span class="tag" style="font-size:0.58rem; padding:0.15em 0.4em;">clip_outliers_iqr</span>
+        </div>
+      </div>
+
+      <div class="col">
+        <!-- Reward Structure -->
+        <h3 style="font-size:0.85rem; margin-bottom:0.5rem;">Multi-Signal Reward</h3>
+        <div style="background:var(--gray-100); border-radius:6px; padding:0.8rem; font-family:monospace; font-size:0.68rem; margin-bottom:0.5rem;">
+          <div style="color:var(--gray-500); font-size:0.6rem; margin-bottom:0.3rem;">PER-STEP</div>
+          step_reward = max(quality_delta &minus; 0.02, &minus;0.15)
+        </div>
+        <div style="background:var(--gray-100); border-radius:6px; padding:0.8rem; font-family:monospace; font-size:0.68rem; margin-bottom:0.5rem;">
+          <div style="color:var(--gray-500); font-size:0.6rem; margin-bottom:0.3rem;">QUALITY GATE BONUS</div>
+          pass: +0.15 &nbsp;&nbsp;|&nbsp;&nbsp; fail: &minus;0.10
+        </div>
+        <div style="background:var(--gray-100); border-radius:6px; padding:0.8rem; font-family:monospace; font-size:0.68rem;">
+          <div style="color:var(--gray-500); font-size:0.6rem; margin-bottom:0.3rem;">FINAL REWARD</div>
+          0.45 &times; quality + 0.30 &times; gate_pass + 0.25 &times; op_coverage
+        </div>
+
+        <!-- 6 Quality Gates -->
+        <h3 style="font-size:0.85rem; margin-top:1rem; margin-bottom:0.4rem;">6 Quality Gates</h3>
+        <div style="font-size:0.7rem; color:var(--gray-700);">
+          <div style="display:flex; gap:0.3rem; align-items:center; margin-bottom:0.25rem;"><span style="color:var(--green); font-weight:700;">1</span> No unresolved missing values</div>
+          <div style="display:flex; gap:0.3rem; align-items:center; margin-bottom:0.25rem;"><span style="color:var(--green); font-weight:700;">2</span> No duplicate rows</div>
+          <div style="display:flex; gap:0.3rem; align-items:center; margin-bottom:0.25rem;"><span style="color:var(--green); font-weight:700;">3</span> Data consistency (columns + target preserved)</div>
+          <div style="display:flex; gap:0.3rem; align-items:center; margin-bottom:0.25rem;"><span style="color:var(--green); font-weight:700;">4</span> Row retention &ge; 85%</div>
+          <div style="display:flex; gap:0.3rem; align-items:center; margin-bottom:0.25rem;"><span style="color:var(--green); font-weight:700;">5</span> Dtype alignment (all expected types match)</div>
+          <div style="display:flex; gap:0.3rem; align-items:center;"><span style="color:var(--green); font-weight:700;">6</span> Stability probe (3-fold CV std &le; 0.15)</div>
+        </div>
+
+        <!-- Curriculum -->
+        <h3 style="font-size:0.85rem; margin-top:1rem; margin-bottom:0.4rem;">Curriculum Scheduler</h3>
+        <table class="comp-table" style="font-size:0.68rem; margin-top:0;">
+          <tr>
+            <th>Stage</th>
+            <th>Noise</th>
+            <th>Rows</th>
+            <th>Steps</th>
+            <th>Promote at</th>
+          </tr>
+          <tr>
+            <td>Easy</td><td>Light</td><td>100</td><td>22</td><td>70%</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">Medium</td><td>Medium</td><td>500</td><td>18</td><td>65%</td>
+          </tr>
+          <tr>
+            <td>Hard</td><td>Heavy</td><td>1,000</td><td>15</td><td>&mdash;</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ████████ SLIDE 6: RESULTS ████████ -->
+<div class="slide" data-slide="5">
+  <div>
+    <div class="label mb-1">Measured Results</div>
+    <h2>GRPO teaches a 3B model<br>to use the full pipeline</h2>
+
+    <div class="row mt-2">
+      <div class="col-wide">
+        <!-- E2E comparison -->
+        <div class="chart-group">
+          <div class="chart-group-title">End-to-End Score (0.30 cleaning + 0.30 enrichment + 0.40 answering)</div>
+          <div class="bar-row">
+            <div class="bar-label" style="font-weight:700;">DataSage</div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:61.3%; background: var(--black);">
+                <span class="bar-value">0.613</span>
+              </div>
+            </div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">GPT-4o-mini</div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:57.8%; background: var(--gray-400);">
+                <span class="bar-value">0.578</span>
+              </div>
+            </div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Qwen 2.5-3B base</div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:57.8%; background: var(--gray-400);">
+                <span class="bar-value">0.578</span>
+              </div>
+            </div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Qwen3-8B</div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:50.0%; background: var(--gray-400);">
+                <span class="bar-value">0.500</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Answering comparison -->
+        <div class="chart-group">
+          <div class="chart-group-title">Answering Reward &mdash; GRPO improvement: +15.3%</div>
+          <div class="bar-row">
+            <div class="bar-label">GPT-4o-mini</div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:71.2%; background: var(--gray-400);">
+                <span class="bar-value">0.712</span>
+              </div>
+            </div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label" style="font-weight:700;">DataSage</div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:66.1%; background: var(--answering);">
+                <span class="bar-value">0.661</span>
+              </div>
+            </div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Qwen 2.5-3B base</div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:57.3%; background: var(--gray-200);">
+                <span class="bar-value" style="color:var(--gray-700);">0.573</span>
+              </div>
+            </div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Qwen3-8B</div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:51.5%; background: var(--gray-200);">
+                <span class="bar-value" style="color:var(--gray-700);">0.515</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-narrow">
+        <div class="callout" style="margin-top:0;">
+          <p>"GPT-4o-mini answers better in isolation &mdash; but can't use enrichment tools. DataSage wins the full pipeline."</p>
+        </div>
+
+        <div style="margin-top:1.2rem;">
+          <h3>Key insight</h3>
+          <p style="font-size:0.85rem;">
+            Enrichment coverage:<br>
+            <strong>DataSage: 0.200</strong> vs GPT-4o-mini: 0.017
+          </p>
+          <p style="font-size:0.85rem; margin-top:0.5rem;">
+            GRPO taught the 3B model to <strong>use all three stages</strong> &mdash;
+            not just answer well, but clean and enrich data first.
+          </p>
+        </div>
+
+        <div class="spec-grid" style="margin-top:1.2rem;">
+          <div class="spec-item">
+            <div class="label">Base</div>
+            <div class="spec-value">Qwen 2.5-3B</div>
+          </div>
+          <div class="spec-item">
+            <div class="label">Method</div>
+            <div class="spec-value">GRPO</div>
+          </div>
+          <div class="spec-item">
+            <div class="label">Quant</div>
+            <div class="spec-value">4-bit QLoRA</div>
+          </div>
+          <div class="spec-item">
+            <div class="label">LoRA r</div>
+            <div class="spec-value">16</div>
+          </div>
+          <div class="spec-item">
+            <div class="label">Epochs</div>
+            <div class="spec-value">3</div>
+          </div>
+          <div class="spec-item">
+            <div class="label">Steps</div>
+            <div class="spec-value">192</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ████████ SLIDE 7: FUTURE WORK ████████ -->
+<div class="slide" data-slide="6">
+  <div>
+    <div class="label mb-1">What's Next</div>
+    <h2>Future Work &amp; Resources</h2>
+
+    <div class="row" style="gap:3vw;">
+      <div class="col" style="flex: 0 0 55%;">
+        <h3 style="margin-bottom:0.8rem;">Research-backed roadmap <span style="font-weight:400; color:var(--gray-400); font-size:0.8rem;">&mdash; 30+ papers, ~9.5 hrs for all quick wins</span></h3>
+
+        <table class="comp-table" style="font-size:0.78rem;">
+          <tr>
+            <th>Improvement</th>
+            <th>Stage</th>
+            <th>Impact</th>
+            <th>Effort</th>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">Downstream reward signal</td>
+            <td>Pipeline</td>
+            <td style="font-weight:700;">Very High</td>
+            <td>1 hr</td>
+          </tr>
+          <tr>
+            <td colspan="4" style="color:var(--gray-500); font-size:0.72rem; padding-top:0; border-bottom:none;">LLM-as-Judge propagates answer quality back to cleaning &amp; enrichment rewards</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">Multi-turn dialogue</td>
+            <td>Answering</td>
+            <td style="font-weight:700;">Very High</td>
+            <td>2 hrs</td>
+          </tr>
+          <tr>
+            <td colspan="4" style="color:var(--gray-500); font-size:0.72rem; padding-top:0; border-bottom:none;">Transforms single-step eval into true RL with clarifications &amp; refinement</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">Budget-constrained enrichment</td>
+            <td>Enrichment</td>
+            <td>High</td>
+            <td>30 min</td>
+          </tr>
+          <tr>
+            <td colspan="4" style="color:var(--gray-500); font-size:0.72rem; padding-top:0; border-bottom:none;">Limited budget turns coverage checklist into real optimization problem</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">Schema drift</td>
+            <td>Cleaning</td>
+            <td>High</td>
+            <td>3 hrs</td>
+          </tr>
+          <tr>
+            <td colspan="4" style="color:var(--gray-500); font-size:0.72rem; padding-top:0; border-bottom:none;">Columns rename/retype between episodes &mdash; aligns with Patronus AI prize</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600;">GDPO reward normalization</td>
+            <td>Training</td>
+            <td>High</td>
+            <td>30 min</td>
+          </tr>
+          <tr>
+            <td colspan="4" style="color:var(--gray-500); font-size:0.72rem; padding-top:0; border-bottom:none;">Per-reward normalization prevents training signal collapse in multi-objective GRPO</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="col">
+        <h3 style="margin-bottom:0.6rem;">Live resources</h3>
+        <div style="display:flex; flex-direction:column; gap:0.5rem;">
+          <a class="link-card" href="https://ricalanis.github.io/openenv-hackaton/" target="_blank" style="padding:0.8rem 1rem;">
+            <h3 style="font-size:0.85rem;">Results Dashboard</h3>
+            <div class="link-url">ricalanis.github.io/openenv-hackaton</div>
+          </a>
+          <a class="link-card" href="https://github.com/ricalanis/openenv-hackaton" target="_blank" style="padding:0.8rem 1rem;">
+            <h3 style="font-size:0.85rem;">Source Code</h3>
+            <div class="link-url">github.com/ricalanis/openenv-hackaton</div>
+          </a>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;">
+            <a class="link-card" href="https://huggingface.co/spaces/ricalanis/datasage-cleaning" target="_blank" style="padding:0.6rem 0.8rem;">
+              <h3 style="font-size:0.78rem; color:var(--cleaning);">Cleaning Env</h3>
+              <div class="link-url" style="font-size:0.65rem;">HF Space</div>
+            </a>
+            <a class="link-card" href="https://huggingface.co/spaces/ricalanis/datasage-enrichment" target="_blank" style="padding:0.6rem 0.8rem;">
+              <h3 style="font-size:0.78rem; color:var(--enrichment);">Enrichment Env</h3>
+              <div class="link-url" style="font-size:0.65rem;">HF Space</div>
+            </a>
+            <a class="link-card" href="https://huggingface.co/spaces/ricalanis/datasage-answering" target="_blank" style="padding:0.6rem 0.8rem;">
+              <h3 style="font-size:0.78rem; color:var(--answering);">Answering Env</h3>
+              <div class="link-url" style="font-size:0.65rem;">HF Space</div>
+            </a>
+            <a class="link-card" href="https://huggingface.co/ricalanis/cleaning-grpo" target="_blank" style="padding:0.6rem 0.8rem;">
+              <h3 style="font-size:0.78rem;">3 LoRA Models</h3>
+              <div class="link-url" style="font-size:0.65rem;">HF Hub</div>
+            </a>
+          </div>
+        </div>
+
+        <div style="margin-top:1rem; text-align:center; padding:1rem; border:1.5px solid var(--gray-200); border-radius:8px;">
+          <p style="font-size: 0.78rem; color: var(--gray-500); margin-bottom:0.4rem;">Built by</p>
+          <p style="font-weight:700; font-size:0.95rem;">Ricardo Alanis</p>
+          <p style="font-size:0.72rem; color:var(--gray-500);">CTO @ Fleet</p>
+          <p style="font-weight:700; font-size:0.95rem; margin-top:0.3rem;">Israel Mata</p>
+          <p style="font-size:0.72rem; color:var(--gray-500);">Nowports</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const progress = document.getElementById('progress');
+  const counter = document.getElementById('counter');
+  const total = slides.length;
+  let current = 0;
+
+  function goTo(n) {
+    if (n < 0 || n >= total) return;
+    slides[current].classList.remove('active');
+    current = n;
+    slides[current].classList.add('active');
+    progress.style.width = ((current + 1) / total * 100) + '%';
+    counter.textContent = (current + 1) + ' / ' + total;
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      goTo(current + 1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      goTo(current - 1);
+    } else if (e.key === 'Home') {
+      goTo(0);
+    } else if (e.key === 'End') {
+      goTo(total - 1);
+    }
+  });
+
+  // Touch/swipe support
+  let touchStartX = 0;
+  document.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; });
+  document.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].screenX - touchStartX;
+    if (Math.abs(dx) > 50) {
+      dx < 0 ? goTo(current + 1) : goTo(current - 1);
+    }
+  });
+
+  // Click left/right halves
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('a')) return;
+    e.clientX > window.innerWidth / 2 ? goTo(current + 1) : goTo(current - 1);
+  });
+
+  // Init
+  goTo(0);
+</script>
+</body>
+</html>

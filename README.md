@@ -42,27 +42,107 @@ Three **OpenEnv RL environments** that model a real enterprise data pipeline —
      3 personas: Executive · Manager · IC
 ```
 
-### The Pipeline in Action
+### Environment Details
 
-**Stage 1 — Cleaning (Bronze → Silver):** The agent receives a messy enterprise dataset and must diagnose and fix data quality issues through sequential actions: filling nulls, fixing types, removing duplicates, standardizing formats, correcting typos. Reward is based on a composite DQ score (completeness, consistency, uniqueness) enhanced with Snorkel-style labeling functions.
+#### Stage 1 — Cleaning (Bronze → Silver)
 
-**Stage 2 — Enrichment (Silver → Gold):** The cleaned data gets enriched with derived fields from 20 domain-specific sources (e.g., salary bands from income, flight risk scores from tenure + satisfaction, velocity scores from stage duration). The agent learns which enrichments matter for each domain.
+The agent receives a 50-row corrupted enterprise dataset and must diagnose and fix data quality issues through up to 15 sequential actions.
 
-**Stage 3 — Answering (Gold → Insight):** Given enriched data, a question, and a persona, the agent produces a cited analytical answer adapted to the audience — executives get ROI language, managers get operational metrics, ICs get actionable next steps.
+**Action space** (6 operations):
 
-### Deep Dive: Data Cleaning as Core Challenge
+| Operation | What it does | Example |
+|-----------|-------------|---------|
+| `fill_null` | Fill missing values with median/mode/specific value | `fill_null(column="Age", value="median")` |
+| `fix_type` | Cast column to correct numeric type | `fix_type(column="MonthlyIncome")` |
+| `remove_duplicate` | Drop duplicate rows | `remove_duplicate()` |
+| `standardize` | Normalize case + strip whitespace | `standardize(column="Department")` |
+| `trim` | Strip leading/trailing whitespace | `trim(column="JobRole")` |
+| `correct_typo` | Replace wrong value with correct one | `correct_typo(column="Status", wrong="Actve", correct="Active")` |
 
-Cleaning is where we invested the deepest effort — it's the stage with the richest sequential decision-making:
+**Corruption injection** (15% rate per cell): nulls in numeric columns, type mismatches (strings in numeric), typos in categoricals, duplicate rows, whitespace issues.
 
-- **6 operations** across up to **15 steps** per episode
-- **4 enterprise domains** prevent memorization — the agent must generalize cleaning strategies
-- **Dense reward signal**: `0.50 x DQ_after + 0.50 x improvement_delta`
-- **DQ scoring**: `0.40 x completeness + 0.35 x consistency + 0.25 x uniqueness`
-- **Seeded deterministic resets** — reproducible training/evaluation alignment
-- **18 Snorkel-style labeling functions** for domain-aware quality assessment
-- **Curriculum design**: from single-corruption episodes to complex multi-issue datasets
+**Reward**: `0.50 x DQ_after + 0.50 x min(improvement x 5.0, 1.0)` — rewards both absolute quality and improvement delta.
 
-The cleaning environment demonstrates the core FSDS principle: the agent handles the mechanical diagnosis and repair, while the human defines what "clean" means through quality gates and data contracts.
+**DQ score**: `0.40 x completeness + 0.35 x consistency + 0.25 x uniqueness`, where completeness = 1 - null_ratio, consistency = fraction of valid numeric values, uniqueness = 1 - duplicate_ratio. Enhanced with 18 Snorkel-style labeling functions per domain.
+
+**Episode ends** when DQ > 0.95 or step >= 15.
+
+#### Stage 2 — Enrichment (Silver → Gold)
+
+The agent takes the cleaned dataset and adds domain-specific derived fields from a registry of 20 enrichment sources (5 per domain).
+
+**Enrichment sources by domain**:
+
+| Domain | Available enrichments |
+|--------|----------------------|
+| HR | `salary_band`, `tenure_risk`, `satisfaction_index`, `industry_benchmark`, `flight_risk_score` |
+| Sales | `deal_size_category`, `velocity_score`, `win_probability_model`, `industry_code`, `competitive_risk` |
+| PM | `schedule_risk_score`, `resource_utilization`, `dependency_chain_depth`, `burndown_rate`, `delay_probability` |
+| IT Ops | `sla_compliance_flag`, `mttr_band`, `escalation_path`, `incident_severity_score`, `recurring_pattern_flag` |
+
+**Action space**: `add_field`, `lookup`, `compute_derived`, `add_category` — each adds a new column derived from existing data.
+
+**Reward**: direct coverage ratio (fields successfully added / total available for domain).
+
+**Episode ends** when coverage > 0.80 or step >= 12.
+
+#### Stage 3 — Answering (Gold → Insight)
+
+Single-step episode: the agent receives a 100-row enriched dataset, a domain, a persona, and a question, then produces a cited analytical answer.
+
+**3 personas** with distinct language and focus:
+
+| Persona | Focus | Keywords | Example question |
+|---------|-------|----------|-----------------|
+| **Executive** | Strategic/financial | revenue, ROI, trend, margin, portfolio | "What factors correlate with turnover?" |
+| **Manager** | Operational/actionable | team, performance, bottleneck, SLA, capacity | "Which systems have the most incidents?" |
+| **IC** | Personal/tactical | my, next step, deadline, assigned, current | "Which projects are at risk of missing deadlines?" |
+
+**Reward** (without Patronus): `0.30 x faithfulness + 0.70 x persona_alignment`
+
+- **Faithfulness**: scored by cited column validity (0.5 x valid_columns/total_cited) + sample value references (0.15 per column, max 3)
+- **Persona alignment**: 0.50 x keyword_hits + 0.20 x formality_score + 0.30 base - anti_keyword_penalty
+
+---
+
+### FSDS Cleaning Environment — Deep Dive
+
+Beyond the 3-stage pipeline, we built a **standalone cleaning environment** (`fsds_cleaning_env/`) with deeper RL mechanics: curriculum learning, quality gates, and structured noise profiles.
+
+**3 task types** across different business domains:
+
+| Task | Type | Target column | Schema |
+|------|------|--------------|--------|
+| `ecommerce_mobile` | Classification | `converted` | session_id, device_os, customer_id, country, items_in_cart, order_value, event_date |
+| `subscription_churn` | Classification | `churned` | customer_key, age, monthly_spend, plan_type, tenure_months, payment_method |
+| `delivery_eta` | Regression | `delivery_time_minutes` | route_id, city, driver_rating, delivery_distance_km, late_deliveries_last_30d, vehicle_type |
+
+**8 cleaning operations**: `drop_duplicates`, `replace_invalid_with_null`, `cast_numeric`, `cast_datetime`, `impute_numeric` (median/mean), `impute_categorical` (mode), `normalize_categories`, `clip_outliers_iqr`
+
+**Noise injection** with 3 profiles:
+
+| Profile | Missing | Invalid tokens | Duplicates | Outliers | Category drift | String-in-numeric |
+|---------|:---:|:---:|:---:|:---:|:---:|:---:|
+| Light | 2% | 2% | 2% | 1% | 3% | 2% |
+| Medium | 5% | 4% | 3% | 2% | 6% | 3% |
+| Heavy | 8% | 6% | 5% | 4% | 10% | 5% |
+
+**Reward structure**:
+- Per-step: `max(quality_delta - 0.02, -0.15)` — improvement must exceed a 0.02 margin
+- Quality gate bonus: +0.15 pass / -0.10 fail
+- Final: `0.45 x quality_score + 0.30 x gate_pass + 0.25 x required_op_coverage`
+
+**6 quality gates**: no unresolved missing values, no duplicates, data consistency (columns + target preserved), row retention >= 85%, dtype alignment, stability probe (3-fold CV std <= 0.15).
+
+**Curriculum scheduler** — automatic difficulty progression:
+
+| Stage | Noise | Rows | Max steps | Promotion threshold |
+|-------|-------|:---:|:---------:|:-------------------:|
+| Easy | Light | 100 | 22 | 70% success (10-ep window) |
+| Medium | Medium | 500 | 18 | 65% success (15-ep window) |
+| Hard | Heavy | 1000 | 15 | — |
+
+This environment serves as a research testbed for exploring harder cleaning challenges with richer reward signals and progressive difficulty.
 
 ---
 
@@ -188,6 +268,23 @@ with CleaningEnv(base_url="https://ricalanis-datasage-cleaning.hf.space") as env
     obs = env.step(CleaningAction(operation="fill_null", column="Age", value="median"))
     obs = env.step(CleaningAction(operation="remove_duplicate"))
 ```
+
+---
+
+## Future Work
+
+Research-backed proposals in [`possible-improvements/`](possible-improvements/), organized by stage:
+
+| Improvement | Stage | Impact | Effort | Why it matters |
+|-------------|-------|--------|--------|----------------|
+| **Downstream reward signal** | Pipeline | Very High | 1 hr | Upstream stages optimize for proxies (DQ, coverage) disconnected from answer quality. LLM-as-Judge propagates business value back. |
+| **Multi-turn dialogue** | Answering | Very High | 2 hrs | Transforms single-step evaluation into true RL with clarifications and iterative refinement. |
+| **Step cost + invalid op penalty** | Cleaning | High | 30 min | Forces strategic action selection; currently no penalty for brute-force or wrong operations. |
+| **Budget-constrained enrichment** | Enrichment | High | 30 min | Transforms coverage checklist into real optimization: 3 units budget, variable costs per source. |
+| **Schema drift** | Cleaning | High | 3 hrs | Columns rename/retype between episodes. Aligns with Patronus AI prize (Consumer Workflows with Schema Drift). |
+| **GDPO multi-reward normalization** | Training | High | 30 min | Normalizes each reward independently before aggregation; prevents training signal collapse. |
+
+Total: **~9.5 hours** for all high-impact quick wins. Each proposal includes code sketches and references to 30+ academic papers across 5 research areas.
 
 ---
 
