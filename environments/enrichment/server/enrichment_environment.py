@@ -53,21 +53,34 @@ class EnrichmentEnvironment(Environment):
         self._fields_added: list[str] = []
         self._max_steps: int = 12
 
-    def reset(self) -> EnrichmentObservation:
+    def reset(self, seed: int | None = None, domain: str | None = None) -> EnrichmentObservation:
         """
         Reset the environment.
 
         Picks a random domain, loads a cleaned data batch (50 rows),
         and presents domain-specific enrichment sources.
 
+        Args:
+            seed: If provided, seeds ``random`` before any stochastic
+                  operation so the reset is fully reproducible.
+            domain: If provided (and valid), use this domain instead of a
+                    random choice.
+
         Returns:
             EnrichmentObservation with initial dataset state and available enrichments.
         """
+        # Seed RNG for reproducibility when requested
+        if seed is not None:
+            random.seed(seed)
+
         self._state = State(episode_id=str(uuid4()), step_count=0)
         self._fields_added = []
 
-        # Pick a random domain
-        self._domain = random.choice(list(DOMAINS.keys()))
+        # Domain selection
+        if domain is not None and domain in DOMAINS:
+            self._domain = domain
+        else:
+            self._domain = random.choice(list(DOMAINS.keys()))
         self._domain_config = DOMAINS[self._domain]
 
         # Load cleaned data batch (50 rows)

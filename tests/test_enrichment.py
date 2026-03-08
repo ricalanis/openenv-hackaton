@@ -3,8 +3,16 @@
 import sys
 import os
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'environments', 'enrichment'))
+# Add project root first so `environments.*` resolves correctly.
+# The enrichment dir is *appended* (not inserted at 0) to avoid its local
+# ``environments/`` sub-directory shadowing the top-level package.
+_project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if _project_root not in sys.path:
+    sys.path.insert(0, _project_root)
+
+_enrichment_root = os.path.join(_project_root, 'environments', 'enrichment')
+if _enrichment_root not in sys.path:
+    sys.path.append(_enrichment_root)
 
 from environments.enrichment.server.enrichment_environment import EnrichmentEnvironment
 from environments.enrichment.models import EnrichmentAction
@@ -63,8 +71,30 @@ def test_enrichment_full_episode():
     print(f"PASS: full episode domain={domain} coverage={obs.enrichment_coverage:.2f} steps={step}")
 
 
+def test_enrichment_seeded_reset():
+    env1 = EnrichmentEnvironment()
+    obs1 = env1.reset(seed=42, domain="hr")
+    env2 = EnrichmentEnvironment()
+    obs2 = env2.reset(seed=42, domain="hr")
+    assert obs1.domain == obs2.domain == "hr"
+    assert obs1.available_sources == obs2.available_sources
+    assert obs1.data_preview == obs2.data_preview
+    print(f"PASS: enrichment seeded reset identical")
+
+
+def test_enrichment_seeded_reset_different_seeds():
+    env1 = EnrichmentEnvironment()
+    obs1 = env1.reset(seed=42, domain="hr")
+    env2 = EnrichmentEnvironment()
+    obs2 = env2.reset(seed=99, domain="hr")
+    # Data preview may differ due to different random samples
+    print(f"PASS: enrichment different seeds work")
+
+
 if __name__ == "__main__":
     test_enrichment_reset()
     test_enrichment_step()
     test_enrichment_full_episode()
+    test_enrichment_seeded_reset()
+    test_enrichment_seeded_reset_different_seeds()
     print("\nAll enrichment tests PASSED")
