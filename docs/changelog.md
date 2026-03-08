@@ -1,5 +1,39 @@
 # DataSage Changelog
 
+## 2026-03-08 - Make Training Notebooks Fully Self-Contained
+
+**Problem:** Notebooks imported from the project repo (`training.shared.*`, `environments.*`), which broke in Colab because the repo clone + sys.path setup was fragile.
+
+### All 3 notebooks (cleaning, enrichment, answering)
+- Removed Cell 2 (repo clone + sys.path setup) entirely
+- Removed all imports from `training.shared.*` and `environments.*`
+- Removed `openenv-core` and `pydantic` from pip install
+- Inlined config constants (`ENV_URL`, `BASE_MODEL`, hyperparams) directly in each notebook
+- Inlined parser functions (`parse_cleaning_action`, `parse_enrichment_action`, `parse_answering_action`, `_extract_column`) as plain functions
+- Inlined auxiliary reward functions (`cleaning_json_format_reward`, `source_relevance_reward`, `enrichment_json_format_reward`, `patronus_reward_fn`, `local_faithfulness_fn`, `answering_json_format_reward`, `persona_match_reward`)
+- Inlined persona definitions (`Persona` dataclass, `PERSONAS`, `score_persona_alignment`, `_check_formality`) in answering notebook
+- Replaced `EnvClient` usage with plain `requests.post()` to HF Space HTTP endpoints (`/reset`, `/step`)
+- Only pip deps: `unsloth`, `trl`, `datasets`, `wandb`, `requests` (+ optional `patronus` for answering)
+
+### Cell structure (all notebooks)
+| # | Content |
+|---|---------|
+| 0 | Markdown header + Colab badge |
+| 1 | `!pip install` (no openenv-core) |
+| 2 | API keys (Colab Secrets) |
+| 3 | Config + parser + auxiliary reward functions (all inlined) |
+| 4 | Model loading (Unsloth) |
+| 5 | System prompt + task descriptions |
+| 6 | Dataset build (plain `requests` to HF Space) |
+| 7 | Env reward function (plain `requests`) |
+| 8 | GRPOConfig |
+| 9 | Trainer + train |
+| 10 | Save + push to Hub |
+
+### Files unchanged
+- Everything outside `training/train_*.ipynb` is unchanged
+- Existing tests unaffected (they test server-side code, not notebooks)
+
 ## 2026-03-07 - Fix Colab Notebook Tensor Instability
 
 **Problem:** Notebooks crashed with tensor length errors due to `rollout_func` + `generate_rollout_completions` manually managing `prompt_ids`/`completion_ids`/`logprobs` tensor lists. Any size mismatch crashed training.
