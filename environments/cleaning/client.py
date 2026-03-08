@@ -2,6 +2,8 @@
 
 from typing import Dict
 
+import requests as _requests
+
 from openenv.core import EnvClient
 from openenv.core.client_types import StepResult
 from openenv.core.env_server.types import State
@@ -22,6 +24,15 @@ class CleaningEnv(EnvClient[CleaningAction, CleaningObservation, State]):
         ...     ))
         ...     print(result.observation.dq_score)
     """
+
+    def reset_with_seed(self, seed: int, domain: str | None = None) -> StepResult[CleaningObservation]:
+        """Reset with a specific seed for reproducible state."""
+        payload = {"seed": seed}
+        if domain:
+            payload["domain"] = domain
+        resp = _requests.post(f"{self.base_url}/reset-with-seed", json=payload)
+        resp.raise_for_status()
+        return self._parse_result(resp.json())
 
     def _step_payload(self, action: CleaningAction) -> Dict:
         """Convert CleaningAction to JSON payload."""

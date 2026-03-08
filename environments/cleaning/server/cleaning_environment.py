@@ -60,16 +60,44 @@ class CleaningEnvironment(Environment):
     # ------------------------------------------------------------------
     # reset
     # ------------------------------------------------------------------
-    def reset(self) -> CleaningObservation:
-        """Pick a random domain, load a 50-row batch, inject corruption."""
+    def reset(self, seed: int | None = None, domain: str | None = None) -> CleaningObservation:
+        """Pick a domain, load a 50-row batch, inject corruption.
+
+        Args:
+            seed: If provided, seeds both ``random`` and ``np.random`` before
+                  any stochastic operation so the reset is fully reproducible.
+            domain: If provided (and valid), use this domain instead of a
+                    random choice.
+        """
+        # Seed RNGs for reproducibility when requested
+        if seed is not None:
+            random.seed(seed)
+            np.random.seed(seed)
+
         self._state = State(episode_id=str(uuid4()), step_count=0)
 
-        self._domain_name = random.choice(list(DOMAINS.keys()))
+        # Domain selection
+        if domain is not None and domain in DOMAINS:
+            self._domain_name = domain
+        else:
+            self._domain_name = random.choice(list(DOMAINS.keys()))
         self._domain_config = DOMAINS[self._domain_name]
 
-        # Load raw data and sample 50 rows
+        # Load raw data and sample 50 rows.
+        # When a seed is provided, temporarily patch np.random.default_rng so
+        # that downstream helpers (load_domain_data, inject_corruption) which
+        # create their own RNG via default_rng(42) instead receive a generator
+        # seeded with *our* seed, making corruption fully reproducible.
         raw_df = load_domain_data(self._domain_name, sample_size=50)
-        self._df = inject_corruption(raw_df, self._domain_config, rate=0.15)
+        if seed is not None:
+            _orig_default_rng = np.random.default_rng
+            np.random.default_rng = lambda *a, **kw: _orig_default_rng(seed)
+            try:
+                self._df = inject_corruption(raw_df, self._domain_config, rate=0.15)
+            finally:
+                np.random.default_rng = _orig_default_rng
+        else:
+            self._df = inject_corruption(raw_df, self._domain_config, rate=0.15)
 
         dq = compute_dq_score(self._df, self._domain_config)
         dq_report = (
@@ -77,6 +105,9 @@ class CleaningEnvironment(Environment):
             f"consistency={dq['consistency']:.4f}  "
             f"uniqueness={dq['uniqueness']:.4f}"
         )
+
+        # Store initial DQ for later improvement-delta rewards
+        self._initial_dq = dq["overall"]
 
         return CleaningObservation(
             domain=self._domain_name,

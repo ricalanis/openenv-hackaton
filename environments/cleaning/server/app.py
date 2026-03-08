@@ -32,6 +32,24 @@ app = create_app(
 )
 
 
+from fastapi import Request
+
+
+@app.post("/reset-with-seed")
+async def reset_with_seed(request: Request):
+    """Reset environment with a specific seed for reproducible state."""
+    body = await request.json()
+    seed = body.get("seed")
+    domain = body.get("domain")
+    env = CleaningEnvironment()
+    obs = env.reset(seed=seed, domain=domain)
+    return {
+        "observation": obs.model_dump(),
+        "done": obs.done,
+        "reward": obs.reward,
+    }
+
+
 def main(host: str = "0.0.0.0", port: int = 8000):
     """Entry point for direct execution."""
     import uvicorn

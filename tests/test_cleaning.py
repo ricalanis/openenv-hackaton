@@ -3,8 +3,16 @@
 import sys
 import os
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'environments', 'cleaning'))
+# Add project root first so `environments.*` resolves correctly.
+# The cleaning dir is *appended* (not inserted at 0) to avoid its local
+# ``environments/`` sub-directory shadowing the top-level package.
+_project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if _project_root not in sys.path:
+    sys.path.insert(0, _project_root)
+
+_cleaning_root = os.path.join(_project_root, 'environments', 'cleaning')
+if _cleaning_root not in sys.path:
+    sys.path.append(_cleaning_root)
 
 from environments.cleaning.server.cleaning_environment import CleaningEnvironment
 from environments.cleaning.models import CleaningAction
@@ -69,8 +77,37 @@ def test_cleaning_all_domains():
     assert len(domains_seen) >= 2, f"Should see multiple domains, got: {domains_seen}"
 
 
+def test_cleaning_seeded_reset():
+    """Seeded resets must produce identical state."""
+    env1 = CleaningEnvironment()
+    obs1 = env1.reset(seed=42, domain="hr")
+
+    env2 = CleaningEnvironment()
+    obs2 = env2.reset(seed=42, domain="hr")
+
+    assert obs1.domain == obs2.domain == "hr"
+    assert obs1.dq_score == obs2.dq_score, f"DQ mismatch: {obs1.dq_score} vs {obs2.dq_score}"
+    assert obs1.data_preview == obs2.data_preview, "Data preview should be identical"
+    print(f"PASS: seeded reset produces identical state, dq={obs1.dq_score:.4f}")
+
+
+def test_cleaning_seeded_reset_different_seeds():
+    """Different seeds must produce different state."""
+    env1 = CleaningEnvironment()
+    obs1 = env1.reset(seed=42, domain="hr")
+
+    env2 = CleaningEnvironment()
+    obs2 = env2.reset(seed=99, domain="hr")
+
+    assert obs1.dq_score != obs2.dq_score or obs1.data_preview != obs2.data_preview, \
+        "Different seeds should produce different states"
+    print(f"PASS: different seeds produce different states")
+
+
 if __name__ == "__main__":
     test_cleaning_reset()
     test_cleaning_step()
     test_cleaning_all_domains()
+    test_cleaning_seeded_reset()
+    test_cleaning_seeded_reset_different_seeds()
     print("\nAll cleaning tests PASSED")
