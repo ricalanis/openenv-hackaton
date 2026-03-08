@@ -5,9 +5,12 @@ import json
 import os
 import sys
 
-BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DEMO_DATA = os.path.join(BASE, "demo", "data")
-DOCS = os.path.join(BASE, "docs")
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+# scripts/ lives inside whole-pipeline-analysis/
+PIPELINE_DIR = os.path.dirname(SCRIPT_DIR)
+REPO_ROOT = os.path.dirname(PIPELINE_DIR)
+DEMO_DATA = os.path.join(PIPELINE_DIR, "demo", "data")
+DOCS = os.path.join(REPO_ROOT, "docs")
 
 
 def load(name):
