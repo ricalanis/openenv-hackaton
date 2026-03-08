@@ -2,7 +2,8 @@
 set -e
 echo "=== DataSage Stage 1: Cleaning GRPO Training ==="
 echo "GPU Info:"
-nvidia-smi
+nvidia-smi 2>/dev/null || echo "nvidia-smi not available (GPU may still work via CUDA)"
+python -c "import torch; print(f'PyTorch CUDA: {torch.cuda.is_available()}, Devices: {torch.cuda.device_count()}')" 2>/dev/null || echo "PyTorch CUDA check failed"
 echo ""
 
 echo "=== Installing dependencies ==="
