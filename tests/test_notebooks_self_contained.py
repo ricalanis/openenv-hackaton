@@ -142,6 +142,13 @@ def test_pip_install_has_requests(name):
 
 
 @pytest.mark.parametrize('name', NOTEBOOK_NAMES)
+def test_pip_install_has_trl_vllm(name):
+    nb = _load_notebook(name)
+    pip_cell = ''.join(nb['cells'][1]['source'])
+    assert 'trl[vllm]' in pip_cell, f"{name} pip install missing trl[vllm]"
+
+
+@pytest.mark.parametrize('name', NOTEBOOK_NAMES)
 def test_pip_install_no_pydantic(name):
     nb = _load_notebook(name)
     pip_cell = ''.join(nb['cells'][1]['source'])
