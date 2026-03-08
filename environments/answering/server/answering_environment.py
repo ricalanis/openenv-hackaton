@@ -57,12 +57,27 @@ class AnsweringEnvironment(Environment):
     # ------------------------------------------------------------------
     # reset
     # ------------------------------------------------------------------
-    def reset(self) -> AnsweringObservation:
-        """Pick a random domain, persona, and question; load enriched data summary."""
+    def reset(self, seed: int | None = None, domain: str | None = None) -> AnsweringObservation:
+        """Pick a domain, persona, and question; load enriched data summary.
+
+        Args:
+            seed: If provided, seeds both ``random`` and ``np.random`` before
+                  any stochastic operation so the reset is fully reproducible.
+            domain: If provided (and valid), use this domain instead of a
+                    random choice.
+        """
+        # Seed RNGs for reproducibility when requested
+        if seed is not None:
+            random.seed(seed)
+            np.random.seed(seed)
+
         self._state = State(episode_id=str(uuid4()), step_count=0)
 
-        # Pick random domain
-        self._domain_name = random.choice(list(DOMAINS.keys()))
+        # Pick domain
+        if domain is not None and domain in DOMAINS:
+            self._domain_name = domain
+        else:
+            self._domain_name = random.choice(list(DOMAINS.keys()))
         self._domain_config = DOMAINS[self._domain_name]
 
         # Pick random persona

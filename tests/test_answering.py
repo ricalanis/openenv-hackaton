@@ -3,8 +3,16 @@
 import sys
 import os
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'environments', 'answering'))
+# Add project root first so `environments.*` resolves correctly.
+# The answering dir is *appended* (not inserted at 0) to avoid its local
+# ``environments/`` sub-directory shadowing the top-level package.
+_project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if _project_root not in sys.path:
+    sys.path.insert(0, _project_root)
+
+_answering_root = os.path.join(_project_root, 'environments', 'answering')
+if _answering_root not in sys.path:
+    sys.path.append(_answering_root)
 
 from environments.answering.server.answering_environment import AnsweringEnvironment
 from environments.answering.models import AnsweringAction
@@ -67,9 +75,39 @@ def test_answering_all_personas():
     assert len(personas_seen) >= 2, f"Should see multiple personas, got: {personas_seen}"
 
 
+def test_answering_seeded_reset():
+    """Seeded resets must produce identical state."""
+    env1 = AnsweringEnvironment()
+    obs1 = env1.reset(seed=42, domain="hr")
+
+    env2 = AnsweringEnvironment()
+    obs2 = env2.reset(seed=42, domain="hr")
+
+    assert obs1.domain == obs2.domain == "hr"
+    assert obs1.persona == obs2.persona, f"Persona mismatch: {obs1.persona} vs {obs2.persona}"
+    assert obs1.question == obs2.question, "Question mismatch"
+    assert obs1.dataset_summary == obs2.dataset_summary
+    print(f"PASS: answering seeded reset identical, persona={obs1.persona}")
+
+
+def test_answering_seeded_reset_different_seeds():
+    """Different seeds must produce different state."""
+    env1 = AnsweringEnvironment()
+    obs1 = env1.reset(seed=42, domain="hr")
+
+    env2 = AnsweringEnvironment()
+    obs2 = env2.reset(seed=99, domain="hr")
+
+    assert obs1.persona != obs2.persona or obs1.question != obs2.question, \
+        "Different seeds should produce different states"
+    print(f"PASS: different seeds produce different states")
+
+
 if __name__ == "__main__":
     test_answering_reset()
     test_answering_step_good()
     test_answering_step_bad()
     test_answering_all_personas()
+    test_answering_seeded_reset()
+    test_answering_seeded_reset_different_seeds()
     print("\nAll answering tests PASSED")
