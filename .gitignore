@@ -12,3 +12,4 @@ venv/
 data/raw/
 *.parquet
 .env
+*.safetensors
