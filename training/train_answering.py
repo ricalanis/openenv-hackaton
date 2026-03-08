@@ -57,6 +57,9 @@ model, tokenizer = FastLanguageModel.from_pretrained(
     model_name=BASE_MODEL,
     max_seq_length=2048,
     load_in_4bit=True,
+    fast_inference=True,
+    max_lora_rank=16,
+    gpu_memory_utilization=0.6,
 )
 
 model = FastLanguageModel.get_peft_model(

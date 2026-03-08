@@ -1,5 +1,23 @@
 # DataSage Changelog
 
+## 2026-03-08 - Fix GRPO Tensor Size Mismatch (254 vs 255)
+
+**Problem:** GRPOTrainer crashed with `RuntimeError: The size of tensor a (254) must match the size of tensor b (255)` during training. Prior fixes (batch_size=1, fp16, dtype) didn't resolve it.
+
+**Root cause:** Without `fast_inference=True` on `FastLanguageModel.from_pretrained()`, Unsloth uses HF's native `generate()` for GRPO's multi-generation step. Native generate doesn't properly pad/align sequences of different completion lengths when computing log probabilities. The earlier removal of `use_vllm` (commit 7979408) was correct for external vLLM, but Unsloth's `fast_inference=True` creates an internal vLLM engine that supports PEFT/LoRA.
+
+**Fix (matches [Unsloth's official Qwen2.5-3B GRPO reference](https://colab.research.google.com/github/unslothai/notebooks/blob/main/nb/Qwen2.5_(3B)-GRPO.ipynb)):**
+
+### All 3 notebooks (cleaning, enrichment, answering)
+- Added `fast_inference=True`, `max_lora_rank=16`, `gpu_memory_utilization=0.6` to `FastLanguageModel.from_pretrained()`
+- Added `use_vllm=True` to `GRPOConfig` (uses Unsloth's internal vLLM, not external)
+- Removed `dtype=torch.float16` (Unsloth handles dtype internally)
+- Removed `fp16=True, bf16=False` from GRPOConfig
+- Added optimizer settings from reference: `adam_beta1=0.9`, `adam_beta2=0.99`, `weight_decay=0.1`, `warmup_ratio=0.1`, `lr_scheduler_type="cosine"`, `optim="adamw_8bit"`, `max_grad_norm=0.1`
+
+### All 3 .py scripts (cleaning, enrichment, answering)
+- Added `fast_inference=True`, `max_lora_rank=16`, `gpu_memory_utilization=0.6` to `from_pretrained()` (already had `use_vllm=True`)
+
 ## 2026-03-08 - Make Training Notebooks Fully Self-Contained
 
 **Problem:** Notebooks imported from the project repo (`training.shared.*`, `environments.*`), which broke in Colab because the repo clone + sys.path setup was fragile.
