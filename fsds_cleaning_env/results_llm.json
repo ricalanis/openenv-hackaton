@@ -1,0 +1,464 @@
+{
+  "agent": "LLMAgent",
+  "base_url": "https://israaaML-fsds-cleaning-env.hf.space",
+  "n_episodes": 45,
+  "aggregate": {
+    "episodes": 45,
+    "success_rate": 0.0,
+    "avg_return": 0.0,
+    "avg_steps": 0.0,
+    "avg_invalid_actions": 0.0
+  },
+  "episodes": [
+    {
+      "task_name": "ecommerce_mobile_baseline_seed0",
+      "task_id": "ecommerce_mobile",
+      "episode": 0,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "ecommerce_mobile_baseline_seed0",
+      "task_id": "ecommerce_mobile",
+      "episode": 1,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "ecommerce_mobile_baseline_seed0",
+      "task_id": "ecommerce_mobile",
+      "episode": 2,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "ecommerce_mobile_baseline_seed1",
+      "task_id": "ecommerce_mobile",
+      "episode": 0,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "ecommerce_mobile_baseline_seed1",
+      "task_id": "ecommerce_mobile",
+      "episode": 1,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "ecommerce_mobile_baseline_seed1",
+      "task_id": "ecommerce_mobile",
+      "episode": 2,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "ecommerce_mobile_baseline_seed2",
+      "task_id": "ecommerce_mobile",
+      "episode": 0,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "ecommerce_mobile_baseline_seed2",
+      "task_id": "ecommerce_mobile",
+      "episode": 1,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "ecommerce_mobile_baseline_seed2",
+      "task_id": "ecommerce_mobile",
+      "episode": 2,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "ecommerce_mobile_baseline_seed3",
+      "task_id": "ecommerce_mobile",
+      "episode": 0,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "ecommerce_mobile_baseline_seed3",
+      "task_id": "ecommerce_mobile",
+      "episode": 1,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "ecommerce_mobile_baseline_seed3",
+      "task_id": "ecommerce_mobile",
+      "episode": 2,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "ecommerce_mobile_baseline_seed4",
+      "task_id": "ecommerce_mobile",
+      "episode": 0,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "ecommerce_mobile_baseline_seed4",
+      "task_id": "ecommerce_mobile",
+      "episode": 1,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "ecommerce_mobile_baseline_seed4",
+      "task_id": "ecommerce_mobile",
+      "episode": 2,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "subscription_churn_baseline_seed0",
+      "task_id": "subscription_churn",
+      "episode": 0,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "subscription_churn_baseline_seed0",
+      "task_id": "subscription_churn",
+      "episode": 1,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "subscription_churn_baseline_seed0",
+      "task_id": "subscription_churn",
+      "episode": 2,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "subscription_churn_baseline_seed1",
+      "task_id": "subscription_churn",
+      "episode": 0,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "subscription_churn_baseline_seed1",
+      "task_id": "subscription_churn",
+      "episode": 1,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "subscription_churn_baseline_seed1",
+      "task_id": "subscription_churn",
+      "episode": 2,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "subscription_churn_baseline_seed2",
+      "task_id": "subscription_churn",
+      "episode": 0,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "subscription_churn_baseline_seed2",
+      "task_id": "subscription_churn",
+      "episode": 1,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "subscription_churn_baseline_seed2",
+      "task_id": "subscription_churn",
+      "episode": 2,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "subscription_churn_baseline_seed3",
+      "task_id": "subscription_churn",
+      "episode": 0,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "subscription_churn_baseline_seed3",
+      "task_id": "subscription_churn",
+      "episode": 1,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "subscription_churn_baseline_seed3",
+      "task_id": "subscription_churn",
+      "episode": 2,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "subscription_churn_baseline_seed4",
+      "task_id": "subscription_churn",
+      "episode": 0,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "subscription_churn_baseline_seed4",
+      "task_id": "subscription_churn",
+      "episode": 1,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "subscription_churn_baseline_seed4",
+      "task_id": "subscription_churn",
+      "episode": 2,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "delivery_eta_baseline_seed0",
+      "task_id": "delivery_eta",
+      "episode": 0,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "delivery_eta_baseline_seed0",
+      "task_id": "delivery_eta",
+      "episode": 1,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "delivery_eta_baseline_seed0",
+      "task_id": "delivery_eta",
+      "episode": 2,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "delivery_eta_baseline_seed1",
+      "task_id": "delivery_eta",
+      "episode": 0,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "delivery_eta_baseline_seed1",
+      "task_id": "delivery_eta",
+      "episode": 1,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "delivery_eta_baseline_seed1",
+      "task_id": "delivery_eta",
+      "episode": 2,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "delivery_eta_baseline_seed2",
+      "task_id": "delivery_eta",
+      "episode": 0,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "delivery_eta_baseline_seed2",
+      "task_id": "delivery_eta",
+      "episode": 1,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "delivery_eta_baseline_seed2",
+      "task_id": "delivery_eta",
+      "episode": 2,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "delivery_eta_baseline_seed3",
+      "task_id": "delivery_eta",
+      "episode": 0,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "delivery_eta_baseline_seed3",
+      "task_id": "delivery_eta",
+      "episode": 1,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "delivery_eta_baseline_seed3",
+      "task_id": "delivery_eta",
+      "episode": 2,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "delivery_eta_baseline_seed4",
+      "task_id": "delivery_eta",
+      "episode": 0,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "delivery_eta_baseline_seed4",
+      "task_id": "delivery_eta",
+      "episode": 1,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    },
+    {
+      "task_name": "delivery_eta_baseline_seed4",
+      "task_id": "delivery_eta",
+      "episode": 2,
+      "error": "No module named 'unsloth'",
+      "success": false,
+      "total_return": 0.0,
+      "steps": 0,
+      "invalid_actions": 0
+    }
+  ]
+}

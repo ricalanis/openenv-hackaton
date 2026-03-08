@@ -1,0 +1,15 @@
+{
+  "task_id": "ecommerce_mobile",
+  "n_episodes": 120,
+  "agent": "heuristic",
+  "base_url": "http://localhost:8000",
+  "max_steps_per_episode": 22,
+  "log_dir": "logs",
+  "log_interval": 10,
+  "seed": 42,
+  "output_dir": "training_output",
+  "curriculum": true,
+  "curriculum_task_ids": ["ecommerce_mobile", "subscription_churn", "delivery_eta"],
+  "curriculum_mode": "round_robin",
+  "curriculum_start_level": "easy"
+}

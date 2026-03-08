@@ -1,0 +1,10 @@
+# Basic RL training config (requires PyYAML: pip install pyyaml)
+task_id: ecommerce_mobile
+n_episodes: 50
+agent: heuristic
+base_url: http://localhost:8000
+max_steps_per_episode: 18
+log_dir: logs
+log_interval: 10
+seed: null
+output_dir: training_output
