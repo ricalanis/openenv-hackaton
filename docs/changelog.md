@@ -1,31 +1,43 @@
 # DataSage Changelog
 
-## 2026-03-08 - Inference Notebook for GRPO Model Evaluation
+## 2026-03-08 - Possible Improvements Research & Proposals
 
-**New:** Created standalone Colab-compatible notebook (`demo/inference/datasage_inference.ipynb`) for running fine-tuned DataSage LoRA models on GPU and generating evaluation data.
+**New:** Created `possible-improvements/` folder with research-backed proposals for improving DataSage environments, training, and reward design. Organized by pipeline stage (cleaning, enrichment, answering) + cross-cutting concerns (pipeline reward propagation, GRPO algorithm improvements).
 
-### Notebook Structure (13 cells)
-| # | Content |
-|---|---------|
-| 0 | Markdown header + Colab badge |
-| 1 | `!pip install unsloth trl wandb requests datasets huggingface_hub` |
-| 2 | API keys (Colab Secrets or env vars) |
-| 3 | Configuration (model repos, env URLs, W&B run IDs, inference settings) |
-| 4-5 | W&B training data export from 3 runs (`xuwyjpe6`, `orww3s2q`, `2mltqk5w`) |
-| 6 | Load base model via Unsloth (`FastLanguageModel.from_pretrained`) |
-| 7 | System prompts + action parsers (inlined from training pipeline) |
-| 8 | Environment helpers (`/web/reset`, `/web/step` endpoints) |
-| 9 | Inference engine (generate_response + episode runners per task) |
-| 10-12 | Run inference: cleaning (4 domains x 3 episodes), enrichment (4x3), answering (4 domains x 3 personas) |
-| 13 | Base model comparison (same episodes without LoRA) |
-| 14-15 | Aggregate results + export JSON + visualizations |
-| 16 | Download files (Colab auto-download) |
+### Key Findings
+- **Pipeline gap identified:** Original design doc specified `downstream_signal` (0.30 for cleaning, 0.50 for enrichment) but it was never implemented. Current rewards are purely proxy-based (DQ score, coverage), disconnected from business value.
+- **Top improvement:** LLM-as-judge for downstream reward signal — evaluates whether cleaning/enrichment actions actually helped the final answer
+- **GRPO fixes:** GDPO per-reward normalization, λ-GRPO for step-level fairness, MO-GRPO for auto-balanced reward weights
+- **Environment innovations:** Budget-constrained enrichment, multi-turn answering, schema drift, dependent corruptions
 
-### Outputs
-- `evaluation_results.json` — Full results with per-domain/per-persona breakdowns
-- `wandb_training_data.json` — Exported W&B metrics from all 3 GRPO training runs
-- `wandb_training_curves.png` — Training reward curves visualization
-- `datasage_vs_base_comparison.png` — Bar chart comparing fine-tuned vs base model
+### Files Created (11 total)
+- `possible-improvements/README.md` — Overview and priority matrix
+- `possible-improvements/{cleaning,enrichment,answering,pipeline,grpo-training}/README.md` — Proposals per area
+- `possible-improvements/{cleaning,enrichment,answering,pipeline,grpo-training}/papers.md` — 30+ referenced papers
+
+## 2026-03-08 - Academic Research Survey: RL Environment Improvements
+
+**New:** Comprehensive literature survey (`docs/research/2026-03-08-rl-environment-improvement-papers.md`) covering 30+ papers across 8 research categories relevant to DataSage's RL training pipeline. Key findings: GDPO (NVIDIA, drop-in GRPO replacement for multi-reward normalization), turn-level credit assignment for multi-step cleaning episodes, VCRL variance-based curriculum learning, and MO-GRPO for automatic reward balancing. Priority recommendations organized by implementation effort vs. impact.
+
+## 2026-03-08 - Inference Notebooks for GRPO Model Evaluation (Split for OOM)
+
+**New:** Split inference into 5 standalone Colab-compatible notebooks (`demo/inference/`) to avoid OOM on T4 GPUs. Each notebook loads only one model at a time.
+
+### Notebooks
+| # | File | GPU | Description | Output |
+|---|------|-----|-------------|--------|
+| 0 | `00_wandb_export.ipynb` | No | Export W&B training metrics from runs `xuwyjpe6`, `orww3s2q`, `2mltqk5w` | `wandb_training_data.json` |
+| 1 | `01_cleaning_inference.ipynb` | Yes | Cleaning LoRA + base model, 4 domains x 3 episodes | `cleaning_results.json` |
+| 2 | `02_enrichment_inference.ipynb` | Yes | Enrichment LoRA + base model, 4 domains x 3 episodes | `enrichment_results.json` |
+| 3 | `03_answering_inference.ipynb` | Yes | Answering LoRA + base model, 4 domains x 3 personas | `answering_results.json` |
+| 4 | `04_aggregate_results.ipynb` | No | Combine all JSONs, comparison table, charts | `evaluation_results.json` |
+
+### Memory management
+- Each GPU notebook loads LoRA adapter → runs inference → `del model; torch.cuda.empty_cache()` → loads base model → runs comparison → frees again
+- No two models in memory at the same time
+- Output JSONs exclude raw action text to keep files small
+
+*(Replaces single monolithic `datasage_inference.ipynb` which caused OOM)*
 
 ## 2026-03-08 - Multi-Model Demo with LangGraph Agentic System
 
