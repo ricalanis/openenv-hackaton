@@ -2,6 +2,14 @@
 
 import os
 import sys
+
+# Load .env for PATRONUS_API_KEY
+try:
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
+except ImportError:
+    pass
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from environments.shared.domains import DOMAINS
@@ -72,16 +80,20 @@ def _get_patronus_score(answer: str, question: str, df) -> float:
     if not api_key:
         return None
     try:
-        from patronus import Client
-        client = Client(api_key=api_key)
-        context = f"Question: {question}\nData columns: {list(df.columns)}"
+        import patronus
+        patronus.init()
+        from patronus import Patronus, RemoteEvaluator
+
+        client = Patronus()
+        lynx = RemoteEvaluator("lynx", "patronus:hallucination")
+        context = f"Data columns: {list(df.columns)}"
         result = client.evaluate(
-            evaluator="lynx-small",
-            criteria="patronus:hallucination",
-            evaluated_model_output=answer,
+            evaluators=lynx,
+            task_output=answer,
+            task_input=question,
             task_context=context,
         )
-        return float(result.score)
+        return float(result.results[0].score)
     except Exception:
         return None
 

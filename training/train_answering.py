@@ -20,6 +20,13 @@ import os
 import re
 import sys
 
+# Load .env for PATRONUS_API_KEY, HF_TOKEN, WANDB_API_KEY
+try:
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
+except ImportError:
+    pass
+
 import torch
 from datasets import Dataset
 from trl import GRPOConfig, GRPOTrainer
@@ -225,18 +232,27 @@ def patronus_reward_fn(completions: list[str], **kwargs) -> list[float]:
     Use Patronus Lynx to evaluate hallucination in model outputs.
     Falls back to local_faithfulness_fn if Patronus is unavailable.
     """
+    api_key = os.environ.get("PATRONUS_API_KEY")
+    if not api_key:
+        return local_faithfulness_fn(completions, **kwargs)
     try:
-        from patronus import Client
-        client = Client()
+        import patronus
+        patronus.init()
+        from patronus import Patronus, RemoteEvaluator
+
+        client = Patronus()
+        lynx = RemoteEvaluator("lynx", "patronus:hallucination")
+        context = kwargs.get("context", "")
+        task_input = kwargs.get("task_input", "Answer the question based on the data.")
         rewards = []
         for text in completions:
             result = client.evaluate(
-                evaluator="lynx-small",
-                criteria="patronus:hallucination",
-                evaluated_model_output=text,
-                task_context=kwargs.get("context", ""),
+                evaluators=lynx,
+                task_output=text,
+                task_input=task_input,
+                task_context=context,
             )
-            rewards.append(float(result.score))
+            rewards.append(float(result.results[0].score))
         return rewards
     except Exception:
         return local_faithfulness_fn(completions, **kwargs)

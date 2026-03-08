@@ -14,6 +14,13 @@ from uuid import uuid4
 import numpy as np
 import pandas as pd
 
+# Load .env file for PATRONUS_API_KEY and other secrets
+try:
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(os.path.dirname(__file__), '..', '..', '..', '.env'))
+except ImportError:
+    pass
+
 # Allow imports from the project root so shared modules are reachable.
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 
@@ -186,14 +193,18 @@ class AnsweringEnvironment(Environment):
         if not api_key:
             return None
         try:
-            from patronus import Client
-            client = Client(api_key=api_key)
+            import patronus
+            patronus.init()
+            from patronus import Patronus, RemoteEvaluator
+
+            client = Patronus()
+            lynx = RemoteEvaluator("lynx", "patronus:hallucination")
             result = client.evaluate(
-                evaluator="lynx-small",
-                criteria="patronus:hallucination",
-                evaluated_model_output=action.answer,
+                evaluators=lynx,
+                task_output=action.answer,
+                task_input=self._question,
                 task_context=context,
             )
-            return float(result.score)
+            return float(result.results[0].score)
         except Exception:
             return None
