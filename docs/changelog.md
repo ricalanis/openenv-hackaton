@@ -1,5 +1,88 @@
 # DataSage Changelog
 
+## 2026-03-07 - Fix Colab Notebook Tensor Instability
+
+**Problem:** Notebooks crashed with tensor length errors due to `rollout_func` + `generate_rollout_completions` manually managing `prompt_ids`/`completion_ids`/`logprobs` tensor lists. Any size mismatch crashed training.
+
+### Notebooks (all 3: cleaning, enrichment, answering)
+- Removed `rollout_func` pattern and `generate_rollout_completions` import
+- Pre-build dataset with real env observations at creation time (64 examples via `reset_with_seed`)
+- Env reward functions defined locally in each notebook — call env directly with stored seeds
+- Seeds stored as dataset column, passed to reward functions via TRL kwargs
+- Auxiliary reward functions (`source_relevance_reward`, `persona_match_reward`, etc.) receive context via dataset columns (`available_sources`, `persona_name`)
+- Dropped `dq_improvement_reward` (redundant with env reward, required rollout kwargs)
+
+### GRPOConfig alignment with OpenEnv tutorial
+- `per_device_train_batch_size`: 4 → 2
+- `num_generations`: 8 → 4
+- `max_completion_length`: 512/768 → 256 (JSON actions are short)
+- `max_prompt_length`: 1024 → 512
+- Updated `training/shared/config.py` TRAINING_CONFIGS to match
+
+### Files unchanged
+- `training/shared/rewards.py` — auxiliary reward functions compatible as-is
+- `training/shared/parsers.py` — reused unchanged
+- `training/train_*.py` — standalone scripts not touched
+
+## 2026-03-07 - Code Quality Refinements
+
+### Reward Functions
+- Extracted all training reward functions to `training/shared/rewards.py` (testable in isolation)
+- Pre-compiled regex patterns (no duplicate `re.search` calls)
+- `enrichment_reward` now has 0.2 completion bonus at 80% coverage threshold (was identity)
+- Removed unused `torch` import from training scripts
+
+### Training Notebooks
+- Converted training scripts to standalone Colab notebooks (`training/train_*.ipynb`)
+- Auto-detect Colab vs local environment, clone repo if needed
+- Import reward functions from shared module instead of inline definitions
+
+### API Validation
+- Added Pydantic `ResetWithSeedRequest` model to all 3 `/reset-with-seed` endpoints
+- Validates `seed: int | None` and `domain: str | None` types
+
+### Tests
+- Added 21 new tests for training reward functions (`tests/test_training_rewards.py`)
+- Fixed `test_enrichment_seeded_reset_different_seeds` (had zero assertions)
+- Total: 42 tests passing
+
+## 2026-03-07 - Reward Pipeline Fix (rollout_func)
+
+**Problem:** Training reward functions evaluated model completions against random environment state, not the context the model saw — rewards were noise. Persona reward checked all 3 personas instead of the requested one. `DOWNSTREAM_CACHE` added no information.
+
+### Seeded Resets (all 3 environments)
+- Added `seed` and `domain` params to `reset()` in Cleaning, Enrichment, and Answering environments
+- Seeds `random.seed(seed)` and `np.random.seed(seed)` for deterministic state
+- Cleaning: monkey-patches `np.random.default_rng` during corruption injection for full determinism
+- Added `POST /reset-with-seed` endpoint to all 3 FastAPI apps (`app.py`)
+- Added `reset_with_seed()` method to all 3 clients (`client.py`)
+
+### Simplified `reward_utils.py`
+- Removed `DOWNSTREAM_CACHE` and `_get_downstream_bucket` — redundant static lookup
+- `cleaning_reward(dq_before, dq_after)` — now takes before/after for delta-based reward
+- `enrichment_reward(coverage)` — direct signal, no downstream mixing
+- `answering_reward(faithfulness, persona_relevance, patronus_score)` — clean weighted blend
+
+### Training Script Rewrites
+- **train_cleaning.py**: Rewritten with `rollout_func` + `generate_rollout_completions`
+  - Replaced 64 static domain prompts with 8 generic task descriptions + live env observation injection
+  - Model now sees real environment observations before generating actions
+  - Rewards evaluate against the same seeded environment state (context-matched)
+  - Added `dq_improvement_reward` (delta-based) replacing `reasoning_reward` (keyword-based)
+  - Removed `reasoning_reward` (too shallow — keyword matching for "first", "let me", etc.)
+- **train_enrichment.py**: Same `rollout_func` rewrite
+  - Added `source_relevance_reward` — checks if model picked a valid source from available_sources
+  - Removed `reasoning_reward`
+- **train_answering.py**: Same `rollout_func` rewrite
+  - **Fixed `persona_match_reward`**: reads requested persona from rollout kwargs, scores alignment against that specific persona only (was checking all 3 and taking max)
+  - Kept `patronus_reward_fn` with local fallback
+
+### Test Infrastructure
+- Added `tests/conftest.py` to handle sys.path isolation (bare `from models import` caused cross-env conflicts when running all tests together)
+- Added `tests/test_reward_utils.py` with 5 tests for simplified reward functions
+- Added seeded reset tests to all 3 environment test files (`test_cleaning`, `test_enrichment`, `test_answering`)
+- Total: 21 tests passing
+
 ## 2026-03-07 - Full Implementation (Phases 0-5)
 
 ### Phase 0: Foundation
