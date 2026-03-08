@@ -1,5 +1,13 @@
 # DataSage Changelog
 
+## 2026-03-08 - Fix GRPO Completion/Mask Size Mismatch (338 vs 256)
+
+**Problem:** After enabling `fast_inference`+`use_vllm`, GRPOTrainer crashed with `RuntimeError: The size of tensor a (338) must match the size of tensor b (256)` in `masked_batch_mean`. The 256 = `max_completion_length`, the 338 = actual completion tokens.
+
+**Root cause:** Environment observations (DQ reports, data previews, column info) tokenize to 600-800+ tokens with the chat template. `max_prompt_length=512` was too small. With vLLM, the full untruncated prompt was sent to generation, producing completions whose length (when computed as `total - max_prompt_length`) exceeded `max_completion_length`.
+
+**Fix:** Increased `MAX_PROMPT_LENGTH` from 512 to 1024 across all training files and shared config. Total `1024 + 256 = 1280` is well within `max_seq_length=2048`.
+
 ## 2026-03-08 - Fix GRPO Tensor Size Mismatch (254 vs 255)
 
 **Problem:** GRPOTrainer crashed with `RuntimeError: The size of tensor a (254) must match the size of tensor b (255)` during training. Prior fixes (batch_size=1, fp16, dtype) didn't resolve it.

@@ -24,7 +24,7 @@ TRAINING_CONFIGS = {
         "gradient_accumulation_steps": 4,
         "num_generations": 4,
         "max_completion_length": 256,
-        "max_prompt_length": 512,
+        "max_prompt_length": 1024,
     },
     "enrichment": {
         "learning_rate": 5e-6,
@@ -33,7 +33,7 @@ TRAINING_CONFIGS = {
         "gradient_accumulation_steps": 4,
         "num_generations": 4,
         "max_completion_length": 256,
-        "max_prompt_length": 512,
+        "max_prompt_length": 1024,
     },
     "answering": {
         "learning_rate": 3e-6,
@@ -42,6 +42,6 @@ TRAINING_CONFIGS = {
         "gradient_accumulation_steps": 4,
         "num_generations": 4,
         "max_completion_length": 256,
-        "max_prompt_length": 512,
+        "max_prompt_length": 1024,
     },
 }
