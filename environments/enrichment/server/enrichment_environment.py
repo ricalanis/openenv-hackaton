@@ -39,7 +39,7 @@ class EnrichmentEnvironment(Environment):
     coverage (fraction of possible enrichments applied).
 
     Done condition: coverage > 0.80 or step_count >= 12.
-    Reward: enrichment_reward(coverage, downstream_bucket).
+    Reward: enrichment_reward(coverage).
     """
 
     SUPPORTS_CONCURRENT_SESSIONS: bool = True
@@ -158,18 +158,8 @@ class EnrichmentEnvironment(Environment):
         possible = self._domain_config.possible_enrichments
         coverage = len(self._fields_added) / len(possible) if possible else 0.0
 
-        # Determine downstream bucket for reward
-        if coverage > 0.80:
-            downstream_bucket = "excellent"
-        elif coverage > 0.50:
-            downstream_bucket = "good"
-        elif coverage > 0.30:
-            downstream_bucket = "fair"
-        else:
-            downstream_bucket = "poor"
-
         # Compute reward
-        reward = enrichment_reward(coverage, downstream_bucket)
+        reward = enrichment_reward(coverage)
 
         # Done condition
         done = coverage > 0.80 or self._state.step_count >= self._max_steps

@@ -153,7 +153,7 @@ class CleaningEnvironment(Environment):
 
         # ---- compute DQ and reward ----
         dq = compute_dq_score(self._df, self._domain_config)
-        reward = cleaning_reward(dq["overall"])
+        reward = cleaning_reward(self._initial_dq, dq["overall"])
         done = dq["overall"] > 0.95 or step >= self._max_steps
 
         dq_report = (
