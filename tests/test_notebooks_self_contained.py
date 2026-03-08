@@ -142,10 +142,10 @@ def test_pip_install_has_requests(name):
 
 
 @pytest.mark.parametrize('name', NOTEBOOK_NAMES)
-def test_pip_install_has_trl_vllm(name):
-    nb = _load_notebook(name)
-    pip_cell = ''.join(nb['cells'][1]['source'])
-    assert 'trl[vllm]' in pip_cell, f"{name} pip install missing trl[vllm]"
+def test_no_use_vllm(name):
+    """vLLM colocate mode crashes with PEFT/LoRA models in Colab."""
+    src = _get_all_source(_load_notebook(name))
+    assert 'use_vllm' not in src, f"{name} still has use_vllm (incompatible with PEFT in Colab)"
 
 
 @pytest.mark.parametrize('name', NOTEBOOK_NAMES)
