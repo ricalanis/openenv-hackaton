@@ -34,12 +34,16 @@ class AnsweringEnv(
         ...     print(result.observation.reward)
     """
 
+    def __init__(self, base_url: str, **kwargs):
+        super().__init__(base_url=base_url, **kwargs)
+        self._http_base_url = base_url.rstrip("/")
+
     def reset_with_seed(self, seed: int, domain: str | None = None) -> StepResult[AnsweringObservation]:
         """Reset with a specific seed for reproducible state."""
         payload = {"seed": seed}
         if domain:
             payload["domain"] = domain
-        resp = _requests.post(f"{self.base_url}/reset-with-seed", json=payload)
+        resp = _requests.post(f"{self._http_base_url}/reset-with-seed", json=payload)
         resp.raise_for_status()
         return self._parse_result(resp.json())
 
