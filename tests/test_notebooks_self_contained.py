@@ -149,6 +149,13 @@ def test_no_use_vllm(name):
 
 
 @pytest.mark.parametrize('name', NOTEBOOK_NAMES)
+def test_has_get_text_helper(name):
+    """All notebooks must have _get_text to handle chat message completions."""
+    src = _get_all_source(_load_notebook(name))
+    assert '_get_text' in src, f"{name} missing _get_text helper"
+
+
+@pytest.mark.parametrize('name', NOTEBOOK_NAMES)
 def test_pip_install_no_pydantic(name):
     nb = _load_notebook(name)
     pip_cell = ''.join(nb['cells'][1]['source'])
@@ -170,6 +177,78 @@ def _exec_cell_3(name):
     ns = {}
     exec('\n'.join(lines), ns)
     return ns
+
+
+# ── _get_text handles both str and chat message formats ──────────
+
+
+class TestGetTextHelper:
+    """Verify _get_text extracts text from both str and chat message formats."""
+
+    @pytest.mark.parametrize('name', NOTEBOOK_NAMES)
+    def test_get_text_with_string(self, name):
+        ns = _exec_cell_3(name)
+        assert ns['_get_text']("hello") == "hello"
+
+    @pytest.mark.parametrize('name', NOTEBOOK_NAMES)
+    def test_get_text_with_chat_messages(self, name):
+        ns = _exec_cell_3(name)
+        msgs = [{"role": "assistant", "content": "the answer"}]
+        assert ns['_get_text'](msgs) == "the answer"
+
+    @pytest.mark.parametrize('name', NOTEBOOK_NAMES)
+    def test_get_text_with_empty_list(self, name):
+        ns = _exec_cell_3(name)
+        assert ns['_get_text']([]) == ""
+
+
+class TestRewardWithChatFormat:
+    """Verify reward functions work with chat message completions (TRL format)."""
+
+    def test_cleaning_json_format_chat(self):
+        ns = _exec_cell_3('train_cleaning.ipynb')
+        fn = ns['cleaning_json_format_reward']
+        completions = [
+            [{"role": "assistant", "content": '{"operation": "fill_null", "column": "age", "value": "median"}'}],
+            [{"role": "assistant", "content": "plain text"}],
+        ]
+        assert fn(completions) == [1.0, 0.0]
+
+    def test_enrichment_json_format_chat(self):
+        ns = _exec_cell_3('train_enrichment.ipynb')
+        fn = ns['enrichment_json_format_reward']
+        completions = [
+            [{"role": "assistant", "content": '{"operation": "add_field", "field_name": "salary_band", "source": "x"}'}],
+            [{"role": "assistant", "content": "plain text"}],
+        ]
+        assert fn(completions) == [1.0, 0.0]
+
+    def test_answering_json_format_chat(self):
+        ns = _exec_cell_3('train_answering.ipynb')
+        fn = ns['answering_json_format_reward']
+        completions = [
+            [{"role": "assistant", "content": '{"answer": "yes", "cited_columns": ["c"], "reasoning": "r"}'}],
+            [{"role": "assistant", "content": "plain text"}],
+        ]
+        assert fn(completions) == [1.0, 0.0]
+
+    def test_persona_match_chat(self):
+        ns = _exec_cell_3('train_answering.ipynb')
+        fn = ns['persona_match_reward']
+        completions = [
+            [{"role": "assistant", "content": "The revenue trend shows 15% growth year-over-year with strong ROI impact on budget margins."}],
+        ]
+        rewards = fn(completions, persona_name=["Executive"])
+        assert rewards[0] > 0.3
+
+    def test_source_relevance_chat(self):
+        ns = _exec_cell_3('train_enrichment.ipynb')
+        fn = ns['source_relevance_reward']
+        completions = [
+            [{"role": "assistant", "content": '{"operation": "add_field", "field_name": "salary_band", "source": "salary_band"}'}],
+        ]
+        rewards = fn(completions, available_sources=[["salary_band", "tenure_risk"]])
+        assert rewards == [1.0]
 
 
 class TestCleaningParity:
