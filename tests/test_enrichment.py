@@ -15,6 +15,7 @@ if _enrichment_root not in sys.path:
     sys.path.append(_enrichment_root)
 
 from environments.enrichment.server.enrichment_environment import EnrichmentEnvironment
+from environments.enrichment.client import EnrichmentEnv
 from environments.enrichment.models import EnrichmentAction
 
 
@@ -83,12 +84,37 @@ def test_enrichment_seeded_reset():
 
 
 def test_enrichment_seeded_reset_different_seeds():
+    """Different seeds with same domain currently produce identical data
+    because load_domain_data uses hardcoded random_state=42.
+    This test verifies both seeds work and that cross-domain seeds differ."""
     env1 = EnrichmentEnvironment()
     obs1 = env1.reset(seed=42, domain="hr")
     env2 = EnrichmentEnvironment()
     obs2 = env2.reset(seed=99, domain="hr")
-    # Data preview may differ due to different random samples
-    print(f"PASS: enrichment different seeds work")
+    # Same domain → same data (known limitation: hardcoded random_state in load_domain_data)
+    assert obs1.domain == obs2.domain == "hr"
+
+    # Different domains SHOULD differ
+    env3 = EnrichmentEnvironment()
+    obs3 = env3.reset(seed=42, domain="sales")
+    assert obs1.available_sources != obs3.available_sources, \
+        "Different domains should have different sources"
+    print(f"PASS: enrichment seeded resets work, cross-domain differs")
+
+
+def test_enrichment_client_stores_http_base_url():
+    """Client must store _http_base_url for reset_with_seed HTTP calls."""
+    url = "https://example.com/enrichment"
+    client = EnrichmentEnv(base_url=url)
+    assert hasattr(client, "_http_base_url"), "Client missing _http_base_url attribute"
+    assert client._http_base_url == url
+    assert not hasattr(client, "base_url"), "base_url should not exist on EnvClient"
+
+
+def test_enrichment_client_strips_trailing_slash():
+    """_http_base_url should strip trailing slashes."""
+    client = EnrichmentEnv(base_url="https://example.com/enrichment/")
+    assert client._http_base_url == "https://example.com/enrichment"
 
 
 if __name__ == "__main__":
@@ -97,4 +123,6 @@ if __name__ == "__main__":
     test_enrichment_full_episode()
     test_enrichment_seeded_reset()
     test_enrichment_seeded_reset_different_seeds()
+    test_enrichment_client_stores_http_base_url()
+    test_enrichment_client_strips_trailing_slash()
     print("\nAll enrichment tests PASSED")

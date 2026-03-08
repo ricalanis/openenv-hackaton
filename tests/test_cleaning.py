@@ -15,6 +15,7 @@ if _cleaning_root not in sys.path:
     sys.path.append(_cleaning_root)
 
 from environments.cleaning.server.cleaning_environment import CleaningEnvironment
+from environments.cleaning.client import CleaningEnv
 from environments.cleaning.models import CleaningAction
 
 
@@ -104,10 +105,27 @@ def test_cleaning_seeded_reset_different_seeds():
     print(f"PASS: different seeds produce different states")
 
 
+def test_cleaning_client_stores_http_base_url():
+    """Client must store _http_base_url for reset_with_seed HTTP calls."""
+    url = "https://example.com/cleaning"
+    client = CleaningEnv(base_url=url)
+    assert hasattr(client, "_http_base_url"), "Client missing _http_base_url attribute"
+    assert client._http_base_url == url
+    assert not hasattr(client, "base_url"), "base_url should not exist on EnvClient"
+
+
+def test_cleaning_client_strips_trailing_slash():
+    """_http_base_url should strip trailing slashes."""
+    client = CleaningEnv(base_url="https://example.com/cleaning/")
+    assert client._http_base_url == "https://example.com/cleaning"
+
+
 if __name__ == "__main__":
     test_cleaning_reset()
     test_cleaning_step()
     test_cleaning_all_domains()
     test_cleaning_seeded_reset()
     test_cleaning_seeded_reset_different_seeds()
+    test_cleaning_client_stores_http_base_url()
+    test_cleaning_client_strips_trailing_slash()
     print("\nAll cleaning tests PASSED")

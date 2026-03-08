@@ -15,6 +15,7 @@ if _answering_root not in sys.path:
     sys.path.append(_answering_root)
 
 from environments.answering.server.answering_environment import AnsweringEnvironment
+from environments.answering.client import AnsweringEnv
 from environments.answering.models import AnsweringAction
 
 
@@ -103,6 +104,21 @@ def test_answering_seeded_reset_different_seeds():
     print(f"PASS: different seeds produce different states")
 
 
+def test_answering_client_stores_http_base_url():
+    """Client must store _http_base_url for reset_with_seed HTTP calls."""
+    url = "https://example.com/answering"
+    client = AnsweringEnv(base_url=url)
+    assert hasattr(client, "_http_base_url"), "Client missing _http_base_url attribute"
+    assert client._http_base_url == url
+    assert not hasattr(client, "base_url"), "base_url should not exist on EnvClient"
+
+
+def test_answering_client_strips_trailing_slash():
+    """_http_base_url should strip trailing slashes."""
+    client = AnsweringEnv(base_url="https://example.com/answering/")
+    assert client._http_base_url == "https://example.com/answering"
+
+
 if __name__ == "__main__":
     test_answering_reset()
     test_answering_step_good()
@@ -110,4 +126,6 @@ if __name__ == "__main__":
     test_answering_all_personas()
     test_answering_seeded_reset()
     test_answering_seeded_reset_different_seeds()
+    test_answering_client_stores_http_base_url()
+    test_answering_client_strips_trailing_slash()
     print("\nAll answering tests PASSED")
