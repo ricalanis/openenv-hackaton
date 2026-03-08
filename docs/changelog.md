@@ -1,5 +1,29 @@
 # DataSage Changelog
 
+## 2026-03-08 - Static Results Dashboard for GitHub Pages
+
+**New:** Created `docs/` static site showcasing DataSage evaluation results, training curves, and model comparisons. Deployable via GitHub Pages from `/docs` on main branch.
+
+### Site Structure
+- `docs/index.html` — Single-page dashboard with 6 sections (Hero, Architecture, Training Curves, Results Comparison, Detailed Breakdown, Links)
+- `docs/css/style.css` — Dark theme design system (Inter font, `#1a1a2e` bg)
+- `docs/js/data.js` — Pre-processed evaluation data (~7KB inline)
+- `docs/js/charts.js` — Chart.js 4.x rendering (bar, line, radar charts)
+- `docs/js/app.js` — Init, scroll animations, dynamic content rendering
+- `docs/data/training_curves.json` — W&B curves async-loaded (~139KB)
+- `scripts/preprocess_data.py` — Extracts data from `demo/data/*.json`
+
+### Key Data Points
+- DataSage LoRA vs Base Qwen2.5-3B: **+15.3% answering improvement**
+- W&B label swap handled in preprocessing (JSON keys ≠ actual tasks)
+- Cleaning starts above done threshold (DQ>0.95) — presented honestly
+- Enrichment at 0.20 coverage across all models — framed as opportunity
+
+### Tech Choices
+- Chart.js 4.x via CDN (60KB vs Plotly's 3.5MB)
+- No build step — pure HTML/CSS/JS
+- Charts: reward/epoch curves, component rewards, loss, grouped bars, radar
+
 ## 2026-03-08 - Possible Improvements Research & Proposals
 
 **New:** Created `possible-improvements/` folder with research-backed proposals for improving DataSage environments, training, and reward design. Organized by pipeline stage (cleaning, enrichment, answering) + cross-cutting concerns (pipeline reward propagation, GRPO algorithm improvements).
